@@ -1,0 +1,39 @@
+﻿@page "/formulario"
+
+<div class="form-group">
+    <label class="col-form-label">Ingrese número 1</label>
+    <input type="number" class="form-control" @bind="numero1"  />
+</div>
+
+<div class="form-group">
+    <label class="col-form-label">Ingrese número 2</label>
+    <input type="number" class="form-control" @bind="numero2" />
+</div>
+
+<button class="btn btn-primary" @onclick="sumar">Sumar</button>
+<button class="btn btn-primary" @onclick="restar">Restar</button>
+<button class="btn btn-primary" @onclick="mutiplicar">Mutiplicar</button>
+
+<p>Resultado: @resultado</p>
+
+@code {
+    private int numero1 = 0;
+    private int numero2 = 0;
+
+    private int resultado;
+
+    private void sumar()
+    {
+        resultado = numero1 + numero2;
+    }
+
+    private void restar()
+    {
+        resultado = numero1 - numero2;
+    }
+
+    private void mutiplicar()
+    {
+        resultado = numero1 * numero2;
+    }
+}

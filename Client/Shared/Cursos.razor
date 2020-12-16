@@ -1,0 +1,14 @@
+﻿<h3>Cursos</h3>
+
+<ul>
+
+    @foreach (string curso in cursos.Where(c => c.Length > 3))
+    {
+      <li>@curso</li>
+    }
+</ul>
+
+@code {
+    [Parameter]
+    public string[] cursos { get; set; } = { "C#", "Visual Basic" };
+}
