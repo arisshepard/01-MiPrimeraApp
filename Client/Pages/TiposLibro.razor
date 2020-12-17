@@ -1,0 +1,27 @@
+﻿@page "/tiposLibro"
+@using _01_MiPrimeraApp.Shared
+@inject HttpClient http
+
+<Lista Cabeceras=cabeceras Cargando=cargando Datos=tiposLibro Mensaje="Ingresa el tipo de libro" Tipo="text" eventBusqueda="Buscar"/>
+
+@code {
+    private TipoLibro[] tiposLibro;
+    private bool cargando = true;
+
+    string[] cabeceras = { "ID", "Nombre", "Descripción" };
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        tiposLibro = await http.GetFromJsonAsync<TipoLibro[]>("api/TipoLibro/Get");
+        cargando = false;
+    }
+
+    public async Task Buscar(string textoBusqueda)
+    {
+        cargando = true;
+        tiposLibro = await http.GetFromJsonAsync<TipoLibro[]>($"api/TipoLibro/Filter/{textoBusqueda}");
+        cargando = false;
+    }
+    
+}

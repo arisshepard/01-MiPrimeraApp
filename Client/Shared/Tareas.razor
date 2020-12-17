@@ -1,0 +1,50 @@
+﻿@using _01_MiPrimeraApp.Shared;
+
+
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th>Día Semana</th>
+            <th>Tarea</th>
+            <th>Realizada</th>
+            <th>Fecha</th>            
+            <th>Herramientas</th>            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Tarea tarea in tareas)
+        {
+            <tr>
+                <td>@tarea.Dia</td>
+                <td>@tarea.Descripcion</td>
+                <td>@tarea.Realizada</td>
+                <td>@tarea.Fecha</td>
+                <td>
+                    <button class="btn btn-danger" type="button" @onclick="@(() => eliminar(tarea.Descripcion))" ><i class="oi oi-delete"/></button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<Tarea> tareas {get; set;}
+
+    public string nombre { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnClickEliminar { get; set; }
+
+    private void eliminar(string tarea)
+    {
+        nombre = tarea;
+
+        //Tarea tareaEliminar = tareas.Where(t => t.Descripcion == tarea).FirstOrDefault();
+
+        //tareas.Remove(tareaEliminar);
+
+        OnClickEliminar.InvokeAsync(tarea);
+    }
+
+}

@@ -1,0 +1,69 @@
+﻿@page "/formularioList"
+@using _01_MiPrimeraApp.Shared
+
+    <form @onsubmit="guardar">
+        <div class="form-group">
+            <label class="col-form-label">Seleccione día de la semana</label>
+            <select class="form-control" @bind=dia>
+                <option value="">--Seleccione--</option>
+                <option value="Lunes">Lunes</option>
+                <option value="Martes">Martes</option>
+                <option value="Miércoles">Miércoles</option>
+                <option value="Jueves">Jueves</option>
+                <option value="Viernes">Viernes</option>
+                <option value="Sábado">Sábado</option>
+                <option value="Domingo">Domingo</option>
+            </select>
+        </div>
+
+        <div class="form-group form-select">
+            <label class="col-form-label">Ingrese la tarea</label>
+            <input class="form-control" type="text" required @bind=descripcion/>
+        </div>
+
+        <div class="form-group">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" @bind=realizada>
+                <label class="form-check-label">
+                    Tarea realizada
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-form-label">Fecha</label>
+            <input class="form-control" type="date" required @bind=fecha @bind:format="yyyy-MM-dd" />
+        </div>
+
+        <input class="btn btn-primary" type="submit" value="Registrar" />
+    </form>
+
+    <Tareas tareas=tareas OnClickEliminar="eliminar"/>
+
+    @code {
+        private string dia;
+        private string descripcion;
+        private bool realizada;
+
+        public DateTime fecha = DateTime.Now;
+
+        private List<Tarea> tareas = new List<Tarea>();
+
+        private void guardar()
+        {
+            tareas.Add(new Tarea
+            {
+                Descripcion = descripcion,
+                Dia = dia,
+                Realizada = realizada,
+                Fecha = fecha
+            });
+        }
+
+        private void eliminar(string tarea)
+        {
+            Tarea tareaEliminar = tareas.Where(t => t.Descripcion == tarea).FirstOrDefault();
+
+            tareas.Remove(tareaEliminar);
+        }
+    }

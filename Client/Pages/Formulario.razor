@@ -2,7 +2,7 @@
 
 <div class="form-group">
     <label class="col-form-label">Ingrese número 1</label>
-    <input type="number" class="form-control" @bind="numero1"  />
+    <input type="number" class="form-control" @bind="numero1" />
 </div>
 
 <div class="form-group">
@@ -16,7 +16,28 @@
 
 <p>Resultado: @resultado</p>
 
+<h1>Uso del bind</h1>
+
+<label>Ingrese Valor</label>
+<input type="text" @bind=numero />
+
+<label>Reactividad</label>
+<input type="text" value="@numero" />
+
+<h1>Uso del bind-value</h1>
+
+<label>Ingrese Valor</label>
+<input type="text" @bind-value=numeroValue @bind-value:event="oninput" />
+
+<label>Reactividad</label>
+<input type="text" value="@numeroValue" />
+
 @code {
+    // El valor del número
+    private int numero = 0;
+
+    private int numeroValue = 0;
+
     private int numero1 = 0;
     private int numero2 = 0;
 

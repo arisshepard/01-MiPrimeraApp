@@ -1,0 +1,96 @@
+﻿@if (Cargando)
+{
+    <div class="alert alert-info text-center" role="alert">
+        <i class="fas fa-sync-alt fa-spin" />
+        <p>Cargando datos, por favor espere...</p>
+    </div>
+}
+else
+{
+    @if (Datos == null)
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>No se han encontrado datos</p>
+        </div>
+    }
+    else
+    {
+        @if (Tipo != "none")
+        {
+            @*<div class="mb-3">
+                <label class="col-form-label">@Mensaje</label>
+                @if (Tipo == "text")
+                {
+                    <input class="form-control" type="text" @bind-value=TextoBusqueda @bind-value:event="oninput" />
+                }
+            </div>
+            <button class="btn btn-primary mb-3" @onclick="Busqueda">Buscar</button>*@
+
+            <nav class="navbar navbar-light bg-light mb-3">
+                <div class="container-fluid">
+                    <form class="d-flex">
+                        @if (Tipo == "text")
+                        {
+                            <input class="form-control me-2" type="search" placeholder=@Mensaje @bind-value=TextoBusqueda @bind-value:event="oninput">
+                        }
+                        <button class="btn btn-outline-success ml-3" @onclick="Busqueda">Buscar</button>
+                    </form>
+                </div>
+            </nav>
+        }
+
+        <table class="table">
+            <thead>
+                <tr>
+                    @foreach (string cabecera in Cabeceras)
+                    {
+
+                        <th>@cabecera</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dato in Datos)
+                {
+                    <tr>
+                        @foreach (var propiedad in dato.GetType().GetProperties())
+                        {
+                            <td>@propiedad.GetValue(dato)</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    [Parameter]
+    public string[] Cabeceras { get; set; }
+
+    [Parameter]
+    public object[] Datos { get; set; }
+
+    [Parameter]
+    public bool Cargando { get; set; }
+
+    // Búsqueda
+    [Parameter]
+    public string Tipo { get; set; } = "none";
+
+    [Parameter]
+    public string Mensaje { get; set; } = "";
+
+    [Parameter]
+    public EventCallback<string> eventBusqueda { get; set; }
+
+    private string TextoBusqueda { get; set; }
+
+    private void Busqueda()
+    {
+        eventBusqueda.InvokeAsync(TextoBusqueda);
+    }
+
+
+}
