@@ -7,34 +7,76 @@
 }
 else
 {
-    @if (Datos == null)
+    @if (Datos == null || !Datos.Any())
     {
-        <div class="alert alert-warning" role="alert">
+        <div class="alert alert-warning text-center" role="alert">
             <i class="fas fa-exclamation-triangle"></i>
             <p>No se han encontrado datos</p>
         </div>
     }
     else
     {
+        if (permitirAgregar)
+        {
+            <NavLink href="@rutaAgregar">
+                <button class="btn btn-success fas fa-plus mb-3"></button>
+            </NavLink>
+        }
+
         @if (Tipo != "none")
         {
             @*<div class="mb-3">
-                <label class="col-form-label">@Mensaje</label>
-                @if (Tipo == "text")
-                {
-                    <input class="form-control" type="text" @bind-value=TextoBusqueda @bind-value:event="oninput" />
-                }
-            </div>
-            <button class="btn btn-primary mb-3" @onclick="Busqueda">Buscar</button>*@
+                    <label class="col-form-label">@Mensaje</label>
+                    @if (Tipo == "text")
+                    {
+                        <input class="form-control" type="text" @bind-value=TextoBusqueda @bind-value:event="oninput" />
+                    }
+                </div>
+                <button class="btn btn-primary mb-3" @onclick="Busqueda">Buscar</button>*@
 
             <nav class="navbar navbar-light bg-light mb-3">
                 <div class="container-fluid">
                     <form class="d-flex">
                         @if (Tipo == "text")
                         {
-                            <input class="form-control me-2" type="search" placeholder=@Mensaje @bind-value=TextoBusqueda @bind-value:event="oninput">
+
+                            @if (Boton)
+                            {
+                                <input class="form-control me-2" type="search" placeholder=@Mensaje @bind-value=TextoBusqueda @bind-value:event="oninput">
+                                <button class="btn btn-outline-success ml-3" @onclick="Busqueda">Buscar</button>
+                            }
+                            else
+                            {
+                                <input class="form-control me-2" type="search" placeholder=@Mensaje @bind-value=TextoBusqueda @bind-value:event="oninput" @onkeyup="Busqueda">
+                            }
                         }
-                        <button class="btn btn-outline-success ml-3" @onclick="Busqueda">Buscar</button>
+                        else if (Tipo == "combobox")
+                        {
+                            @if (Boton)
+                            {
+                                <select class="form-control me-2 form-select" @bind-value=TextoBusqueda @bind-value:event="oninput">
+                                    @foreach (var item in Combobox)
+                                    {
+                                        <option value="@item.GetType().GetProperty(ValueMember).GetValue(item)">
+                                            @item.GetType().GetProperty(DisplayMember).GetValue(item)
+                                        </option>
+                                    }
+                                </select>
+                                <button class="btn btn-outline-success ml-3" @onclick="Busqueda">Buscar</button>
+                            }
+                            else
+                            {
+                                <select class="form-control me-2 form-select" @bind-value=TextoBusqueda @bind-value:event="oninput" @onchange="Busqueda">
+                                    @foreach (var item in Combobox)
+                                    {
+                                        <option value="@item.GetType().GetProperty(ValueMember).GetValue(item)">
+                                            @item.GetType().GetProperty(DisplayMember).GetValue(item)
+                                        </option>
+                                    }
+                                </select>
+
+                            }
+                        }
                     </form>
                 </div>
             </nav>
@@ -48,6 +90,10 @@ else
 
                         <th>@cabecera</th>
                     }
+                    @if (permitirEliminar || permitirEditar)
+                    {
+                        <th>Operaciones</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -58,6 +104,24 @@ else
                         {
                             <td>@propiedad.GetValue(dato)</td>
                         }
+                        <td>
+                            @{
+                                string ID = dato.GetType().GetProperties()[0].GetValue(dato).ToString();
+
+                            }
+                            @if (permitirEliminar)
+                            {
+                                <button class="btn btn-danger fas fa-trash" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => PrepararEliminar(ID))"></button>
+                                <MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />
+                            }
+                            @if (permitirEditar)
+                            {
+
+                                <NavLink href="@rutaEditar">
+                                    <button class="btn btn-primary fas fa-edit ml-1" @onclick="@(() => PrepararEditar(ID))"></button>
+                                </NavLink>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -73,6 +137,13 @@ else
     public object[] Datos { get; set; }
 
     [Parameter]
+    public object[] Combobox { get; set; } = null;
+    [Parameter]
+    public string DisplayMember { get; set; } = null;
+    [Parameter]
+    public string ValueMember { get; set; } = null;
+
+    [Parameter]
     public bool Cargando { get; set; }
 
     // Búsqueda
@@ -80,10 +151,37 @@ else
     public string Tipo { get; set; } = "none";
 
     [Parameter]
-    public string Mensaje { get; set; } = "";
+    public bool Boton { get; set; } = true;
 
     [Parameter]
     public EventCallback<string> eventBusqueda { get; set; }
+
+    [Parameter]
+    public string Mensaje { get; set; } = "";
+
+    [Parameter]
+    public bool permitirAgregar { get; set; } = false;
+    [Parameter]
+    public bool permitirEditar { get; set; } = false;
+    [Parameter]
+    public bool permitirEliminar { get; set; } = false;
+
+    [Parameter]
+    public string EntidadID { get; set; }
+
+    private string MensajeConfirmacion { get; set; }
+
+    [Parameter]
+    public EventCallback<string> eventEditar { get; set; }
+
+    [Parameter]
+    public EventCallback<string> eventEliminar { get; set; }
+
+    [Parameter]
+    public string rutaAgregar { get; set; }
+
+    [Parameter]
+    public string rutaEditar { get; set; }
 
     private string TextoBusqueda { get; set; }
 
@@ -92,5 +190,28 @@ else
         eventBusqueda.InvokeAsync(TextoBusqueda);
     }
 
+    private void PrepararEditar(string ID)
+    {
+        EntidadID = ID;
+        MensajeConfirmacion = $"¿ Desea eliminar el registro con ID {ID} ?";
+        //eventEditar.InvokeAsync(ID);
+    }
+
+    private void PrepararEliminar(string ID)
+    {
+        EntidadID = ID;
+        MensajeConfirmacion = $"¿ Desea guardar los cambios del registro con ID {ID} ?";
+        //eventEliminar.InvokeAsync(ID);
+    }
+
+    private void Eliminar(string ID)
+    {
+        eventEliminar.InvokeAsync(ID);
+    }
+
+    private void Editar(string ID)
+    {
+        eventEditar.InvokeAsync(ID);
+    }
 
 }

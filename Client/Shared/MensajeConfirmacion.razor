@@ -1,0 +1,41 @@
+﻿<!-- Modal -->
+<div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="staticBackdrop">
+    <div class="modal-dialog">
+        <div class="modal-content modal-dialog-centered modal-sm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">@Titulo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h5>@Mensaje</h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" @onclick="Aceptar"  data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public string Mensaje { get; set; }
+
+    [Parameter]
+    public string Titulo { get; set; }
+
+    [Parameter]
+    public string IDEntidad { get; set; }
+
+    [Parameter]
+    public EventCallback<string> eventAceptar { get; set; }
+
+    #region "Métodos"
+    public void Aceptar()
+    {
+        eventAceptar.InvokeAsync(IDEntidad);
+    }
+
+    #endregion
+}

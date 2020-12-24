@@ -1,5 +1,6 @@
 ﻿using _01_MiPrimeraApp.Server.Models;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,6 +40,28 @@ namespace _01_MiPrimeraApp.Controllers
             //}
 
             return lista;
+        }
+
+        [HttpGet]
+        [Route("api/TipoLibro/Delete/{ID}")]
+        public int Delete(string ID)
+        {
+            int respuesta = 0;
+
+            try
+            {
+                TipoLibro tipoLibro = _context.TipoLibro.Where(tipoLibro => tipoLibro.Iidtipolibro.ToString() == ID).FirstOrDefault();
+                tipoLibro.Bhabilitado = 0;
+                _context.SaveChanges();
+                respuesta = 1;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            return respuesta;
         }
 
         [HttpGet]

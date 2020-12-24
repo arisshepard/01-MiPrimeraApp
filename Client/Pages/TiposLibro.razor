@@ -2,10 +2,21 @@
 @using _01_MiPrimeraApp.Shared
 @inject HttpClient http
 
-<Lista Cabeceras=cabeceras Cargando=cargando Datos=tiposLibro Mensaje="Ingresa el tipo de libro" Tipo="text" eventBusqueda="Buscar"/>
+<Lista Cabeceras=cabeceras Cargando=cargando
+       Datos=tiposLibro
+       Mensaje="Ingresa el tipo de libro"
+       Tipo="text"
+       eventBusqueda="Buscar"
+       Boton=false
+       permitirAgregar=true
+       rutaAgregar="agregarTipoLibro"
+       permitirEditar=true
+       rutaEditar="editarTipoLibro"
+       permitirEliminar=true
+       eventEliminar="Eliminar" />
 
 @code {
-    private TipoLibro[] tiposLibro;
+    private _01_MiPrimeraApp.Shared.TipoLibro[] tiposLibro;
     private bool cargando = true;
 
     string[] cabeceras = { "ID", "Nombre", "Descripción" };
@@ -13,15 +24,26 @@
     protected override async Task OnInitializedAsync()
     {
 
-        tiposLibro = await http.GetFromJsonAsync<TipoLibro[]>("api/TipoLibro/Get");
+        tiposLibro = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.TipoLibro[]>("api/TipoLibro/Get");
         cargando = false;
     }
 
     public async Task Buscar(string textoBusqueda)
     {
         cargando = true;
-        tiposLibro = await http.GetFromJsonAsync<TipoLibro[]>($"api/TipoLibro/Filter/{textoBusqueda}");
+        tiposLibro = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.TipoLibro[]>($"api/TipoLibro/Filter/{textoBusqueda}");
         cargando = false;
     }
-    
+
+    public async Task Eliminar(string ID)
+    {
+        cargando = true;
+        int respuesta = await http.GetFromJsonAsync<int>($"api/TipoLibro/Delete/{ID}");
+        if (respuesta == 1)
+        {
+            tiposLibro = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.TipoLibro[]>("api/TipoLibro/Get");
+        }
+        cargando = false;
+    }
+
 }

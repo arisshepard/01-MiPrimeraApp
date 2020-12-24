@@ -1,0 +1,52 @@
+﻿@page "/autores"
+@using _01_MiPrimeraApp.Shared
+@inject HttpClient http
+
+<Lista Cabeceras=cabeceras Cargando=cargando Datos=autores 
+       Mensaje="Ingresa el autor" 
+       Tipo="combobox" 
+       DisplayMember="Nombre" 
+       ValueMember="ID" 
+       Combobox=paises 
+       eventBusqueda="Buscar" 
+       Boton=false
+       permitirEliminar=true
+       permitirAgregar=true
+       permitirEditar=true
+       eventEliminar="Eliminar"/>
+
+@code {
+    private Autor[] autores;
+    private Pais[] paises;
+
+    private bool cargando = true;
+
+    string[] cabeceras = { "ID", "Nombre", "Sexo", "Pais", "Descripción" };
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        autores = await http.GetFromJsonAsync<Autor[]>("api/Autor/Get");
+        paises = await http.GetFromJsonAsync<Pais[]>("api/Pais/Get");
+        cargando = false;
+    }
+
+    public async Task Eliminar(string ID)
+    {
+        cargando = true;
+        int respuesta = await http.GetFromJsonAsync<int>($"api/Autor/delete/{ID}");
+        if (respuesta == 1)
+        {
+            autores = await http.GetFromJsonAsync<Autor[]>("api/Autor/Get");
+        }
+        cargando = false;
+    }
+
+    public async Task Buscar(string textoBusqueda)
+    {
+        cargando = true;
+        autores = await http.GetFromJsonAsync<Autor[]>($"api/Autor/Filter/{textoBusqueda}");
+        cargando = false;
+    }
+
+}
