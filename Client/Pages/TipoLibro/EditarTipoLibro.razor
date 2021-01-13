@@ -1,5 +1,18 @@
-﻿@page "/editarTipoLibro"
-<h1>HELLO</h1>
-@code {
+﻿@page "/editarTipoLibro/{id}"
+@inject HttpClient http;
 
+<h1>EDITAR TIPO LIBRO</h1>
+
+<TipoLibro tipoLibro=TipoLibro />
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    public _01_MiPrimeraApp.Shared.TipoLibro TipoLibro = new _01_MiPrimeraApp.Shared.TipoLibro();
+
+    protected async override Task OnParametersSetAsync()
+    {
+        TipoLibro = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.TipoLibro>($"api/TipoLibro/GetById/{Id}");
+    }
 }

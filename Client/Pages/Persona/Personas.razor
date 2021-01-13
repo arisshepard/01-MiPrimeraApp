@@ -1,0 +1,59 @@
+﻿@page "/personas"
+
+@inject HttpClient http
+
+<Lista Boton=true
+       Cabeceras=cabeceras
+       Cargando=cargando
+       ColumnasMostrar=columnasMostrar
+       Datos=personas
+       eventBusqueda="BuscarPorNombre"
+       eventEliminar="Eliminar"
+       Mensaje="Introduzca nombre completo"
+       permitirAgregar=true
+       permitirEditar=true
+       permitirEliminar=true
+       rutaAgregar="/agregarPersona"
+       rutaEditar="/editarPersona"
+       Tipo="text" />
+
+@code {
+    #region "Propiedades"
+    private string[] cabeceras = { "ID", "Nombre", "Email", "Fecha Nacimiento" };
+    private string[] columnasMostrar = { "ID", "Nombre", "Email", "FechaFormato" };
+    private bool cargando = true;
+
+    private _01_MiPrimeraApp.Shared.Persona[] personas;
+    #endregion
+
+    #region "Métodos sobrescritos"
+    protected override async Task OnInitializedAsync()
+    {
+
+        personas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Persona[]>("api/Persona/GetAll");
+        cargando = false;
+    }
+    #endregion
+
+    #region "Métodos"
+    private async Task BuscarPorNombre(string name)
+    {
+        cargando = true;
+        personas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Persona[]>($"api/Persona/FilterByName/{name}");
+        cargando = false;
+    }
+
+    private async Task Eliminar(string ID)
+    {
+
+        int respuesta = await http.GetFromJsonAsync<int>($"api/Persona/Delete/{ID}");
+
+        if (respuesta == 1)
+        {
+            cargando = true;
+            personas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Persona[]>("api/Persona/GetAll");
+            cargando = false;
+        }
+    }
+    #endregion
+}

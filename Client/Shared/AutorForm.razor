@@ -1,0 +1,99 @@
+﻿@using _01_MiPrimeraApp.Shared
+@inject HttpClient http
+@inject NavigationManager navigationManager
+
+<EditForm Model=Autor OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">ID</label>
+        <InputNumber @bind-Value=Autor.ID class="form-control" readOnly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText @bind-Value=Autor.Nombre class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Primer Apellido</label>
+        <InputText @bind-Value=Autor.PrimerApellido class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Segundo Apellido</label>
+        <InputText @bind-Value=Autor.SegundoApellido class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <InputTextArea @bind-Value=Autor.Descripcion class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Sexo</label>
+        <InputSelect @bind-Value=Autor.IdSexo class="form-control form-select">
+            <option value="">-- Seleccione --</option>
+            @foreach (var sexo in Sexos)
+            {
+                <option value=@sexo.ID>@sexo.Nombre</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Pais</label>
+        <InputSelect @bind-Value=Autor.IdPais class="form-control form-select">
+            <option value="">-- Seleccione --</option>
+            @foreach (var pais in Paises)
+            {
+                <option value=@pais.ID>@pais.Nombre</option>
+            }
+        </InputSelect>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Guardar
+    </button>
+
+    <NavLink href="/autores">
+        <button type="button" class="btn btn-danger">
+            <i class="fas fa-arrow-left"></i> Volver
+        </button>
+    </NavLink>
+</EditForm>
+
+
+@code {
+    #region "Parámetros"
+    [Parameter]
+    public Autor Autor { get; set; } = new Autor();
+
+    [Parameter]
+    public List<Sexo> Sexos { get; set; } = new List<Sexo>();
+
+    [Parameter]
+    public List<Pais> Paises { get; set; } = new List<Pais>();
+    #endregion
+
+    #region "Propiedades"
+    #endregion
+
+    #region "Métodos"
+    private async Task Guardar()
+    {
+        var respuesta = await http.PostAsJsonAsync("api/Autor/Save", Autor);
+
+        var content = await respuesta.Content.ReadFromJsonAsync<object>();
+
+        int rpta = int.Parse(content.ToString());
+
+        if (rpta == 1)
+        {
+            navigationManager.NavigateTo("/autores");
+        }
+    }
+    #endregion
+
+}

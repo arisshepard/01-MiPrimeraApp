@@ -1,4 +1,6 @@
-﻿@if (Cargando)
+﻿@inject NavigationManager navigation;
+
+@if (Cargando)
 {
     <div class="alert alert-info text-center" role="alert">
         <i class="fas fa-sync-alt fa-spin" />
@@ -82,50 +84,121 @@ else
             </nav>
         }
 
-        <table class="table">
-            <thead>
-                <tr>
-                    @foreach (string cabecera in Cabeceras)
-                    {
-
-                        <th>@cabecera</th>
-                    }
-                    @if (permitirEliminar || permitirEditar)
-                    {
-                        <th>Operaciones</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var dato in Datos)
-                {
-                    <tr>
-                        @foreach (var propiedad in dato.GetType().GetProperties())
+        <div class="dataTables_wrapper">
+            <div class="dataTables_length" id="example_length">
+                <label>
+                    Show 
+                    <select name="example_length" aria-controls="example" @bind-value="numeroRegistrosPagina" @onchange="CambiarRegistrosPagina" @bind-value:event="oninput">
+                        <option value="3">3</option>
+                        <option value="5">5</option>
+                        <option value="8">8</option>
+                        <option value="10">10</option>
+                    </select> 
+                    entries
+                </label>
+            </div>
+            <table class="table dataTable">
+                <thead>
+                    <tr role="row">
+                        @foreach (string cabecera in Cabeceras)
                         {
-                            <td>@propiedad.GetValue(dato)</td>
+
+                            <th>@cabecera</th>
                         }
-                        <td>
-                            @{
-                                string ID = dato.GetType().GetProperties()[0].GetValue(dato).ToString();
-
-                            }
-                            @if (permitirEliminar)
-                            {
-                                <button class="btn btn-danger fas fa-trash" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => PrepararEliminar(ID))"></button>
-                                <MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />
-                            }
-                            @if (permitirEditar)
-                            {
-
-                                <NavLink href="@rutaEditar">
-                                    <button class="btn btn-primary fas fa-edit ml-1" @onclick="@(() => PrepararEditar(ID))"></button>
-                                </NavLink>
-                            }
-                        </td>
+                        @if (permitirEliminar || permitirEditar)
+                        {
+                            <th>Operaciones</th>
+                        }
                     </tr>
+                </thead>
+                <tbody>
+
+                    @{
+                        List<object> datosPaginados = new List<object>();
+                        int indice;
+
+                        // al dar clic al botón
+                        if (IndicePaginado > 1)
+                        {
+                            indice = IndicePaginado;
+                        }
+                        else
+                        {
+                            indice = 1;
+                        }
+
+                        // Ej. indice 1 (pos 0 a 9)
+                        int inicio = indice * numeroRegistrosPagina - numeroRegistrosPagina;
+                        int fin = indice * numeroRegistrosPagina;
+
+                        for (int i = inicio; i < fin; i++)
+                        {
+                            if (i < Datos.Length)
+                            {
+                                datosPaginados.Add(Datos[i]);
+                            }
+                        }
+
+                        DatosPaginados = datosPaginados;
+                    }
+
+                    @*@foreach (var dato in Datos)*@
+                    @foreach (var dato in DatosPaginados)
+                    {
+                        <tr class="odd">
+                            @*@foreach (var propiedad in dato.GetType().GetProperties())*@
+                            @foreach (var propiedad in ColumnasMostrar)
+                            {
+                                @*<td>@propiedad.GetValue(dato)</td>*@
+                                <td>@dato.GetType().GetProperty(propiedad).GetValue(dato).ToString()</td>
+                            }
+                            <td>
+                                @{
+                                    //string ID = dato.GetType().GetProperties()[0].GetValue(dato).ToString();
+                                    string ID = dato.GetType().GetProperties().Where(property => property.Name.ToUpper() == "ID" ).First().GetValue(dato).ToString();
+
+                                }
+                                @if (permitirEliminar)
+                                {
+                                    <button class="btn btn-danger fas fa-trash" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => PrepararEliminar(ID))"></button>
+                                    <MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />
+                                }
+                                @if (permitirEditar)
+                                {
+
+                                    @*<NavLink href="@rutaEditar">
+                                            <button class="btn btn-primary fas fa-edit ml-1" @onclick="@(() => PrepararEditar(ID))"></button>
+                                        </NavLink>*@
+
+                                    <button class="btn btn-primary fas fa-edit ml-1" @onclick="@(() => Editar(ID))"></button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @{
+                int inicioPaginado = inicio + 1;
+                int finPaginado = inicioPaginado + numeroRegistrosPagina - 1;
+
+                if (finPaginado > Datos.Length)
+                {
+                    finPaginado = Datos.Length;
                 }
-            </tbody>
-        </table>
+            }
+            <div class="dataTables_info" id="example_info" role="status" aria-live="polite">Showing @inicioPaginado to @finPaginado of @Datos.Length entries</div>
+
+            <div class="dataTables_paginate paging_simple_numbers">
+                <span>
+                    @for (int i = 1; i <= numeroPaginas(); i++)
+                    {
+                        int data = i;
+                        <button @onclick="@(() => Paginar(data))" class="paginate_button" aria-controls="example" data-dt-idx="1" tabindex="0">@i</button>
+                    }
+                </span>
+            </div>
+        </div>
+
     }
 }
 
@@ -133,6 +206,7 @@ else
     [Parameter]
     public string[] Cabeceras { get; set; }
 
+    // Todos los datos
     [Parameter]
     public object[] Datos { get; set; }
 
@@ -185,6 +259,42 @@ else
 
     private string TextoBusqueda { get; set; }
 
+    [Parameter]
+    public string[] ColumnasMostrar { get; set; }
+
+    // PAGINADO
+
+    // Datos paginados
+    public List<object> DatosPaginados { get; set; } = new List<object>();
+
+    public int IndicePaginado { get; set; }
+
+    int numeroRegistrosPagina { get; set; } = 10;
+
+    private int numeroPaginas()
+    {
+        int numeroBotones;
+        int numeroRegistros = Datos.Length;
+
+        // 10 registros por página a la alza
+        if (numeroRegistros % numeroRegistrosPagina == 0)
+        {
+            numeroBotones = numeroRegistros / numeroRegistrosPagina;
+        }
+        else
+        {
+            numeroBotones = (numeroRegistros / numeroRegistrosPagina) + 1;
+        }
+
+        return numeroBotones;
+
+    }
+
+    private void Paginar(int indice)
+    {
+        IndicePaginado = indice;
+    }
+
     private void Busqueda()
     {
         eventBusqueda.InvokeAsync(TextoBusqueda);
@@ -211,7 +321,13 @@ else
 
     private void Editar(string ID)
     {
+        navigation.NavigateTo($"{rutaEditar}/{ID}");
         eventEditar.InvokeAsync(ID);
     }
 
+    private void CambiarRegistrosPagina(ChangeEventArgs e)
+    {
+        int valorCambiado = int.Parse(e.Value.ToString());
+        numeroRegistrosPagina = valorCambiado;
+    }
 }

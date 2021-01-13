@@ -12,21 +12,26 @@
        Boton=false
        permitirEliminar=true
        permitirAgregar=true
+       rutaAgregar="agregarAutor"
        permitirEditar=true
-       eventEliminar="Eliminar"/>
+       rutaEditar="editarAutor"
+       eventEliminar="Eliminar"
+       ColumnasMostrar=propiedadesMostrar/>
 
 @code {
-    private Autor[] autores;
+    private _01_MiPrimeraApp.Shared.Autor[] autores;
     private Pais[] paises;
 
     private bool cargando = true;
 
     string[] cabeceras = { "ID", "Nombre", "Sexo", "Pais", "Descripción" };
 
+    string[] propiedadesMostrar = { "ID", "Nombre", "Sexo", "Pais", "Descripcion" };
+
     protected override async Task OnInitializedAsync()
     {
 
-        autores = await http.GetFromJsonAsync<Autor[]>("api/Autor/Get");
+        autores = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Autor[]>("api/Autor/Get");
         paises = await http.GetFromJsonAsync<Pais[]>("api/Pais/Get");
         cargando = false;
     }
@@ -37,7 +42,7 @@
         int respuesta = await http.GetFromJsonAsync<int>($"api/Autor/delete/{ID}");
         if (respuesta == 1)
         {
-            autores = await http.GetFromJsonAsync<Autor[]>("api/Autor/Get");
+            autores = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Autor[]>("api/Autor/Get");
         }
         cargando = false;
     }
@@ -45,7 +50,7 @@
     public async Task Buscar(string textoBusqueda)
     {
         cargando = true;
-        autores = await http.GetFromJsonAsync<Autor[]>($"api/Autor/Filter/{textoBusqueda}");
+        autores = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Autor[]>($"api/Autor/Filter/{textoBusqueda}");
         cargando = false;
     }
 

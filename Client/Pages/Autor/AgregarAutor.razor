@@ -1,0 +1,28 @@
+﻿@page "/agregarAutor"
+
+@using _01_MiPrimeraApp.Shared
+
+@inject HttpClient http; 
+
+<AutorForm Paises=paises Sexos=sexos />
+
+@code {
+    #region "Propiedades"
+    private List<Pais> paises { get; set; } = new List<Pais>();
+
+    private List<Sexo> sexos { get; set; } = new List<Sexo>();
+    #endregion
+
+    #region "Métodos"
+
+    protected override async Task OnInitializedAsync()
+    {
+        paises = await http.GetFromJsonAsync<List<Pais>>("api/Pais/Get");
+        sexos = await http.GetFromJsonAsync<List<Sexo>>("api/Sexo/Get");
+
+        // TODO: cargando
+    }
+
+
+    #endregion
+}

@@ -1,0 +1,77 @@
+﻿@using _01_MiPrimeraApp.Shared
+@inject HttpClient http;
+@inject NavigationManager navigationManager
+
+<EditForm Model=Persona OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">ID</label>
+        <InputNumber @bind-Value=Persona.ID class="form-control" readOnly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText @bind-Value=Persona.NombreSimple class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Primer Apellido</label>
+        <InputText @bind-Value=Persona.PrimerApellido class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Segundo Apellido</label>
+        <InputText @bind-Value=Persona.SegundoApellido class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Teléfono</label>
+        <InputText @bind-Value=Persona.Telefono class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText @bind-Value=Persona.Email class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Fecha Nacimiento</label>
+        <InputDate @bind-Value=Persona.Fecha class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Guardar
+    </button>
+
+    <NavLink href="/personas">
+        <button type="button" class="btn btn-danger">
+            <i class="fas fa-arrow-left"></i> Volver
+        </button>
+    </NavLink>
+
+</EditForm>
+
+@code {
+    #region "Parámetros"
+    [Parameter]
+    public Persona Persona { get; set; } = new Persona();
+    #endregion
+
+    #region "Métodos"
+    public async Task Guardar()
+    {
+        var respuesta = await http.PostAsJsonAsync("api/Persona/Save", Persona);
+
+        var content = await respuesta.Content.ReadFromJsonAsync<object>();
+
+        int rpta = int.Parse(content.ToString());
+
+        if (rpta == 1)
+        {
+            navigationManager.NavigateTo("/personas");
+        }
+    }
+    #endregion
+}

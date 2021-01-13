@@ -1,0 +1,22 @@
+﻿@page "/editarPersona/{ID}"
+@inject HttpClient http
+
+<PersonaForm Persona=persona />
+
+@code {
+    #region "Parámetros"
+    [Parameter]
+    public string ID { get; set; }
+    #endregion
+
+    #region "Propiedades"
+    private _01_MiPrimeraApp.Shared.Persona persona = new _01_MiPrimeraApp.Shared.Persona();
+    #endregion
+
+    #region "Métodos sobrescritos"
+    protected async override Task OnParametersSetAsync()
+    {
+        persona = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Persona>($"api/Persona/GetById/{ID}");
+    }
+    #endregion
+}

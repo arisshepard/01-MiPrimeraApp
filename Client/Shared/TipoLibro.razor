@@ -1,5 +1,52 @@
-﻿<h3>TipoLibro</h3>
+﻿@using _01_MiPrimeraApp.Shared 
+@inject HttpClient http
+@inject NavigationManager navigationManager;
+
+<EditForm Model=tipoLibro OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">ID</label>
+        <InputNumber @bind-Value=tipoLibro.ID class="form-control" readOnly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText @bind-Value=tipoLibro.Nombre class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <InputText @bind-Value=tipoLibro.Descripcion class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">   
+        <i class="fas fa-save"></i> Guardar
+    </button>
+
+    <NavLink href="/tiposLibro">
+        <button type="button" class="btn btn-danger">
+            <i class="fas fa-arrow-left"></i> Volver
+        </button>
+    </NavLink>
+</EditForm>
 
 @code {
+    [Parameter]
+    public _01_MiPrimeraApp.Shared.TipoLibro tipoLibro { get; set; } = new _01_MiPrimeraApp.Shared.TipoLibro();
 
+    public async Task Guardar()
+    {
+        var respuesta = await http.PostAsJsonAsync("api/TipoLibro/Save", tipoLibro);
+
+        var content = await respuesta.Content.ReadFromJsonAsync<object>();
+
+        int rpta = int.Parse(content.ToString());
+
+        if (rpta == 1)
+        {
+            navigationManager.NavigateTo("/tiposLibro");
+        }
+    }
 }

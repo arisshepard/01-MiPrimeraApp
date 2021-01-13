@@ -1,8 +1,10 @@
 ﻿using _01_MiPrimeraApp.Server.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace _01_MiPrimeraApp.Server.Controllers
 {
@@ -76,6 +78,24 @@ namespace _01_MiPrimeraApp.Server.Controllers
         }
 
         [HttpGet]
+        [Route("api/Sexo/Get")]
+        public List<Shared.Sexo> GetSexo()
+        {
+            List<Shared.Sexo> sexos = new List<Shared.Sexo>();
+
+            sexos = _context.Sexo
+                .Where(sexo => sexo.Bhabilitado == 1)
+                .Select(sexo => new Shared.Sexo
+                {
+                    ID = sexo.Iidsexo,
+                    Nombre = sexo.Nombre
+                })
+                .ToList();
+
+            return sexos;
+        }
+
+        [HttpGet]
         [Route("api/Autor/delete/{ID}")]
         public int EliminarAutor(string ID)
         {
@@ -90,12 +110,81 @@ namespace _01_MiPrimeraApp.Server.Controllers
             }
             catch (Exception ex)
             {
-
                 throw;
             }
 
             return respuesta;
         }
 
+        [HttpGet]
+        [Route("api/Autor/getById/{ID}")]
+        public async Task<Shared.Autor> GetByIdAsync(int ID)
+        {
+            Autor autorDb = await _context.Autor.Where(autor => autor.Iidautor == ID).FirstOrDefaultAsync();
+            Shared.Autor autor = null;
+
+            if (autorDb != null)
+            {
+                autor = new Shared.Autor
+                {
+                    ID = autorDb.Iidautor,
+                    Descripcion = autorDb.Descripcion,
+                    IdPais = autorDb.Iidpais.ToString(),
+                    IdSexo = autorDb.Iidsexo.ToString(),
+                    Nombre = autorDb.Nombre,
+                    PrimerApellido = autorDb.Appaterno,
+                    SegundoApellido = autorDb.Apmaterno
+                };
+            }
+
+            return autor;
+        }
+
+        [HttpPost]
+        [Route("api/Autor/save")]
+        public async Task<int> GuardarAsync(Shared.Autor autor)
+        {
+            int respuesta;
+            try
+            {
+                if (autor.ID == 0)
+                {
+                    Autor autorDb = new Autor
+                    {
+                        Apmaterno = autor.SegundoApellido,
+                        Appaterno = autor.PrimerApellido,
+                        Bhabilitado = 1,
+                        Descripcion = autor.Descripcion,
+                        Iidpais = int.Parse(autor.IdPais),
+                        Iidsexo = int.Parse(autor.IdSexo),
+                        Nombre = autor.Nombre
+                    };
+
+                    await _context.Autor.AddAsync(autorDb);
+                }
+                else
+                {
+                    Autor autorDb = await _context.Autor.Where(autorDb => autorDb.Iidautor == autor.ID).FirstAsync();
+
+                    autorDb.Apmaterno = autor.SegundoApellido;
+                    autorDb.Appaterno = autor.PrimerApellido;
+                    autorDb.Bhabilitado = 1;
+                    autorDb.Descripcion = autor.Descripcion;
+                    autorDb.Iidpais = int.Parse(autor.IdPais);
+                    autorDb.Iidsexo = int.Parse(autor.IdSexo);
+                    autorDb.Nombre = autor.Nombre;
+                }
+
+                await _context.SaveChangesAsync();
+
+                respuesta = 1;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return respuesta;
+        }
     }
 }
