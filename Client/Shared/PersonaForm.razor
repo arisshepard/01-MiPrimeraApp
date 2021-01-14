@@ -41,15 +41,17 @@
         <InputDate @bind-Value=Persona.Fecha class="form-control" />
     </div>
 
-    <button type="submit" class="btn btn-primary">
-        <i class="fas fa-save"></i> Guardar
-    </button>
-
-    <NavLink href="/personas">
-        <button type="button" class="btn btn-danger">
-            <i class="fas fa-arrow-left"></i> Volver
+    @*<button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Guardar
         </button>
-    </NavLink>
+
+        <NavLink href="/personas">
+            <button type="button" class="btn btn-danger">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+        </NavLink>*@
+
+    <BotoneraBasica PaginaVolver="/personas" />
 
 </EditForm>
 

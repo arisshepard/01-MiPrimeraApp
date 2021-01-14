@@ -53,17 +53,20 @@
         </InputSelect>
     </div>
 
-    <button type="submit" class="btn btn-primary">
-        <i class="fas fa-save"></i> Guardar
-    </button>
-
-    <NavLink href="/autores">
-        <button type="button" class="btn btn-danger">
-            <i class="fas fa-arrow-left"></i> Volver
+    @*<div class="btn-toolbar justify-content-md-center mb-3">
+        <button type="submit" class="btn btn-primary me-3">
+            <i class="fas fa-save"></i> Guardar
         </button>
-    </NavLink>
-</EditForm>
 
+        <NavLink href="/autores">
+            <button type="button" class="btn btn-danger">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+        </NavLink>
+    </div>*@
+
+    <BotoneraBasica PaginaVolver="/autores" />
+</EditForm>
 
 @code {
     #region "Parámetros"

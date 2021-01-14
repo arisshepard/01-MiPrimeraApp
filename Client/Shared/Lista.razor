@@ -1,4 +1,14 @@
 ﻿@inject NavigationManager navigation;
+@inject IJSRuntime jsRuntime;
+
+@using System.IO;
+
+@using OfficeOpenXml;
+@using OfficeOpenXml.Style;
+@using iText.Pdfa;
+@using iText.Kernel.Pdf;
+@using iText.Layout;
+@using iText.Layout.Element;
 
 @if (Cargando)
 {
@@ -18,12 +28,33 @@ else
     }
     else
     {
-        if (permitirAgregar)
-        {
-            <NavLink href="@rutaAgregar">
-                <button class="btn btn-success fas fa-plus mb-3"></button>
-            </NavLink>
-        }
+        <div class="btn-toolbar justify-content-md-end mb-3">
+            @if (permitirAgregar)
+            {
+
+                <NavLink href="@rutaAgregar">
+                    <button class="btn btn-primary fas fa-plus me-2"></button>
+                </NavLink>
+
+            }
+
+            @if (PermitirExportarEXCEL)
+            {
+                @*<a class="btn btn-secondary fas fa-file-csv" @onclick="ExportarExcel" href=@Excel></a>*@
+
+                <NavLink href=@Excel>
+                    <button class="btn btn-success fas fa-file-csv me-2" @onclick="ExportarExcel"></button>
+                </NavLink>
+
+            }
+
+            @if (PermitirExportarPDF)
+            {
+                <NavLink href=@PDF>
+                    <button class="btn btn-danger fas fa-file-pdf" @onclick="ExportarPDF"></button>
+                </NavLink>
+            }
+        </div>
 
         @if (Tipo != "none")
         {
@@ -87,13 +118,13 @@ else
         <div class="dataTables_wrapper">
             <div class="dataTables_length" id="example_length">
                 <label>
-                    Show 
+                    Show
                     <select name="example_length" aria-controls="example" @bind-value="numeroRegistrosPagina" @onchange="CambiarRegistrosPagina" @bind-value:event="oninput">
                         <option value="3">3</option>
                         <option value="5">5</option>
                         <option value="8">8</option>
                         <option value="10">10</option>
-                    </select> 
+                    </select>
                     entries
                 </label>
             </div>
@@ -150,28 +181,30 @@ else
                             @foreach (var propiedad in ColumnasMostrar)
                             {
                                 @*<td>@propiedad.GetValue(dato)</td>*@
-                                <td>@dato.GetType().GetProperty(propiedad).GetValue(dato).ToString()</td>
+                                <td>@dato.GetType().GetProperty(propiedad).GetValue(dato)</td>
                             }
                             <td>
                                 @{
                                     //string ID = dato.GetType().GetProperties()[0].GetValue(dato).ToString();
-                                    string ID = dato.GetType().GetProperties().Where(property => property.Name.ToUpper() == "ID" ).First().GetValue(dato).ToString();
+                                    string ID = dato.GetType().GetProperties().Where(property => property.Name.ToUpper() == "ID").First().GetValue(dato).ToString();
 
                                 }
-                                @if (permitirEliminar)
-                                {
-                                    <button class="btn btn-danger fas fa-trash" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => PrepararEliminar(ID))"></button>
-                                    <MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />
-                                }
-                                @if (permitirEditar)
-                                {
+                                <div class="btn-toolbar justify-content-md-center">
+                                    @if (permitirEliminar)
+                                    {
+                                        <button class="btn btn-outline-danger fas fa-trash me-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => PrepararEliminar(ID))"></button>
+                                        <MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />
+                                    }
+                                    @if (permitirEditar)
+                                    {
 
-                                    @*<NavLink href="@rutaEditar">
-                                            <button class="btn btn-primary fas fa-edit ml-1" @onclick="@(() => PrepararEditar(ID))"></button>
-                                        </NavLink>*@
+                                        @*<NavLink href="@rutaEditar">
+                                                <button class="btn btn-primary fas fa-edit ml-1" @onclick="@(() => PrepararEditar(ID))"></button>
+                                            </NavLink>*@
 
-                                    <button class="btn btn-primary fas fa-edit ml-1" @onclick="@(() => Editar(ID))"></button>
-                                }
+                                        <button class="btn btn-outline-primary fas fa-edit" @onclick="@(() => Editar(ID))"></button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
@@ -262,6 +295,16 @@ else
     [Parameter]
     public string[] ColumnasMostrar { get; set; }
 
+    [Parameter]
+    public bool PermitirExportarEXCEL { get; set; }
+
+
+    [Parameter]
+    public bool PermitirExportarPDF { get; set; }
+
+    [Parameter]
+    public string TituloPDF { get; set; }
+
     // PAGINADO
 
     // Datos paginados
@@ -270,6 +313,10 @@ else
     public int IndicePaginado { get; set; }
 
     int numeroRegistrosPagina { get; set; } = 10;
+
+    private string Excel = "";
+
+    private string PDF = "";
 
     private int numeroPaginas()
     {
@@ -323,6 +370,105 @@ else
     {
         navigation.NavigateTo($"{rutaEditar}/{ID}");
         eventEditar.InvokeAsync(ID);
+    }
+
+    private void ExportarExcel()
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            using (ExcelPackage ep = new ExcelPackage())
+            {
+                // valores iniciales
+                int fila = 1;
+                int columna = 1;
+
+                ep.Workbook.Worksheets.Add("Hoja");
+                ExcelWorksheet ew = ep.Workbook.Worksheets[0];
+
+                // Grabar cabeceras
+                for (int i = 1; i <= Cabeceras.Length; i++)
+                {
+                    ew.Column(i).Width = 50;
+                    ew.Cells[fila, i].Value = Cabeceras[i - 1];
+                }
+
+                fila += 1;
+
+                // Grabar Datos
+                foreach (var dato in Datos)
+                {
+                    columna = 1;
+                    foreach (var propiedad in ColumnasMostrar)
+                    {
+                        ew.Cells[fila, columna].Value = dato.GetType().GetProperty(propiedad).GetValue(dato);
+                        columna += 1;
+                    }
+                    fila += 1;
+                }
+
+
+                ep.SaveAs(ms);
+
+                byte[] buffer = ms.ToArray();
+                string base64 = Convert.ToBase64String(buffer);
+                Excel = $"data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64}";
+            }
+        }
+    }
+
+    private void ExportarPDF()
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            PdfWriter writer = new PdfWriter(ms);
+            using (PdfDocument pdfDoc = new PdfDocument(writer))
+            {
+                Document doc = new Document(pdfDoc);
+                Paragraph p1 = new Paragraph(TituloPDF);
+                p1.SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+                p1.SetFontSize(20);
+
+                doc.Add(p1);
+
+                Table table = new Table(Cabeceras.Length);
+                Cell celda;
+
+                for (int i = 0; i < Cabeceras.Length; i++)
+                {
+                    celda = new Cell();
+                    celda.Add(new Paragraph(Cabeceras[i]));
+                    table.AddHeaderCell(celda);
+                }
+
+                foreach (var dato in Datos)
+                {
+                    foreach (var propiedad in ColumnasMostrar)
+                    {
+                        string texto = string.Empty;
+                        if (dato.GetType().GetProperty(propiedad).GetValue(dato) != null)
+                        {
+                            texto = dato.GetType().GetProperty(propiedad).GetValue(dato).ToString();
+                        }
+
+                        celda = new Cell();
+                        celda.Add(new Paragraph(texto));
+                        table.AddCell(celda);
+                    }
+                }
+
+                doc.Add(table);
+
+                doc.Close();
+                writer.Close();
+
+                byte[] buffer = ms.ToArray();
+                string base64 = Convert.ToBase64String(buffer);
+                PDF = "data:application/pdf;base64," + base64;
+
+                // Esto hay que darle una vuelta
+                jsRuntime.InvokeVoidAsync("descargarPDF", PDF);
+            }
+        }
     }
 
     private void CambiarRegistrosPagina(ChangeEventArgs e)

@@ -21,15 +21,18 @@
         <InputText @bind-Value=tipoLibro.Descripcion class="form-control" />
     </div>
 
-    <button type="submit" class="btn btn-primary">   
-        <i class="fas fa-save"></i> Guardar
-    </button>
-
-    <NavLink href="/tiposLibro">
-        <button type="button" class="btn btn-danger">
-            <i class="fas fa-arrow-left"></i> Volver
+    @*<button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Guardar
         </button>
-    </NavLink>
+
+        <NavLink href="/tiposLibro">
+            <button type="button" class="btn btn-danger">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+        </NavLink>*@
+
+
+    <BotoneraBasica PaginaVolver="/tiposLibro" />
 </EditForm>
 
 @code {
