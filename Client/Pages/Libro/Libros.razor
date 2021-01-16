@@ -1,0 +1,64 @@
+﻿@page "/libros"
+@inject HttpClient http;
+
+<Lista 
+       Boton=true
+       Cabeceras=cabeceras 
+       Cargando=cargando 
+       ColumnasMostrar=columnasMostrar
+       Datos=libros
+       eventBusqueda="Buscar"
+       eventEliminar="Eliminar"
+       Mensaje="Introduce título"
+       permitirAgregar=true
+       permitirEditar=true
+       permitirEliminar=true
+       PermitirExportarEXCEL=true
+       PermitirExportarPDF=true
+       rutaAgregar="agregarLibro"
+       rutaEditar="editarLibro"
+       Tipo="text"/>
+
+@code {
+    #region "Propiedades"
+    private string[] cabeceras = { "ID", "Título", "Autor", "Páginas", "Stock" };
+    private string[] columnasMostrar = { "ID", "Titulo", "Autor", "Numpaginas", "Stock" };
+    private bool cargando;
+
+    private _01_MiPrimeraApp.Shared.Libro[] libros;
+    #endregion
+
+    #region "Métodos"
+    protected override async Task OnInitializedAsync()
+    {
+        cargando = true;
+        libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>("api/libros/getAll");
+        cargando = false;
+    }
+
+    private async Task Eliminar(string ID)
+    {
+        cargando = true;
+        HttpResponseMessage respuestaHttp = await http.PutAsJsonAsync<object>($"api/libros/updateById/{ID}", null);
+
+        var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+        int respuesta = int.Parse(content.ToString());
+
+        if (respuesta == 1)
+        {
+            libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>("api/libros/getAll");
+        }
+        cargando = false;
+    }
+
+    private async Task Buscar(string texto)
+    {
+        cargando = true;
+        libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>($"api/libros/filter/{texto}");
+        cargando = false;
+    }
+    #endregion
+
+
+}

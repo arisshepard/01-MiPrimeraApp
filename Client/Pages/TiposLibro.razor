@@ -3,6 +3,7 @@
 @inject HttpClient http
 
 <Lista Cabeceras=cabeceras Cargando=cargando
+       ColumnasMostrar=columnasMostrar
        Datos=tiposLibro
        Mensaje="Ingresa el tipo de libro"
        Tipo="text"
@@ -20,6 +21,7 @@
     private bool cargando = true;
 
     string[] cabeceras = { "ID", "Nombre", "Descripción" };
+    string[] columnasMostrar = { "ID", "Nombre", "Descripcion" };
 
     protected override async Task OnInitializedAsync()
     {

@@ -1,0 +1,32 @@
+﻿@page "/editarLibro/{ID}"
+
+@inject HttpClient http;
+
+<LibroForm Libro=libro Autores=autores />
+
+@code {
+    #region "Parámetros"
+    [Parameter]
+    public string ID { get; set; }
+    #endregion
+
+    #region "Propiedades"
+    private _01_MiPrimeraApp.Shared.Libro libro = new _01_MiPrimeraApp.Shared.Libro();
+    private List<_01_MiPrimeraApp.Shared.Autor> autores = new List<_01_MiPrimeraApp.Shared.Autor>();
+    #endregion
+
+    #region "Métodos"
+    protected override async Task OnParametersSetAsync()
+    {
+        libro = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro>($"api/libros/getById/{ID}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        autores = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.Autor>>("api/Autor/Get");
+
+        // TODO: cargando
+    }
+    #endregion
+
+}

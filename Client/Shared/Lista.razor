@@ -10,6 +10,9 @@
 @using iText.Layout;
 @using iText.Layout.Element;
 
+@using Syncfusion.DocIO;
+@using Syncfusion.DocIO.DLS;
+
 @if (Cargando)
 {
     <div class="alert alert-info text-center" role="alert">
@@ -19,6 +22,41 @@
 }
 else
 {
+<div class="btn-toolbar justify-content-md-end mb-3">
+    @if (permitirAgregar)
+    {
+
+        <NavLink href="@rutaAgregar">
+            <button class="btn btn-primary fas fa-plus me-2"></button>
+        </NavLink>
+
+    }
+
+    @if (Datos != null && Datos.Any() && PermitirExportarEXCEL)
+    {
+        @*<a class="btn btn-secondary fas fa-file-csv" @onclick="ExportarExcel" href=@Excel></a>*@
+
+        <NavLink href=@Excel>
+            <button class="btn btn-success fas fa-file-csv me-2" @onclick="ExportarExcel"></button>
+        </NavLink>
+
+    }
+
+    @if (Datos != null && Datos.Any() && PermitirExportarWord)
+    {
+        <NavLink href=@Word>
+            <button class="btn btn-primary fas fa-file-word me-2" @onclick="ExportarWord"></button>
+        </NavLink>
+    }
+
+    @if (Datos != null && Datos.Any() && PermitirExportarPDF)
+    {
+        <NavLink href=@PDF>
+            <button class="btn btn-danger fas fa-file-pdf" @onclick="ExportarPDF"></button>
+        </NavLink>
+    }
+</div>
+
     @if (Datos == null || !Datos.Any())
     {
         <div class="alert alert-warning text-center" role="alert">
@@ -27,34 +65,7 @@ else
         </div>
     }
     else
-    {
-        <div class="btn-toolbar justify-content-md-end mb-3">
-            @if (permitirAgregar)
-            {
-
-                <NavLink href="@rutaAgregar">
-                    <button class="btn btn-primary fas fa-plus me-2"></button>
-                </NavLink>
-
-            }
-
-            @if (PermitirExportarEXCEL)
-            {
-                @*<a class="btn btn-secondary fas fa-file-csv" @onclick="ExportarExcel" href=@Excel></a>*@
-
-                <NavLink href=@Excel>
-                    <button class="btn btn-success fas fa-file-csv me-2" @onclick="ExportarExcel"></button>
-                </NavLink>
-
-            }
-
-            @if (PermitirExportarPDF)
-            {
-                <NavLink href=@PDF>
-                    <button class="btn btn-danger fas fa-file-pdf" @onclick="ExportarPDF"></button>
-                </NavLink>
-            }
-        </div>
+    {        
 
         @if (Tipo != "none")
         {
@@ -296,6 +307,9 @@ else
     public bool PermitirExportarPDF { get; set; }
 
     [Parameter]
+    public bool PermitirExportarWord { get; set; }
+
+    [Parameter]
     public string TituloPDF { get; set; }
 
     // PAGINADO
@@ -310,6 +324,8 @@ else
     private string Excel = "";
 
     private string PDF = "";
+
+    private string Word = "";
 
     private int numeroPaginas()
     {
@@ -460,6 +476,65 @@ else
                 // Esto hay que darle una vuelta
                 jsRuntime.InvokeVoidAsync("descargarPDF", PDF);
             }
+        }
+    }
+
+
+    private void ExportarWord()
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            WordDocument document = new WordDocument();
+
+            WSection section = document.AddSection() as WSection;
+
+            section.PageSetup.Margins.All = 72;
+
+            IWParagraph paragraph = section.AddParagraph();
+
+            paragraph.ApplyStyle("Normal");
+            paragraph.ParagraphFormat.HorizontalAlignment = HorizontalAlignment.Center;
+            WTextRange textRange = paragraph.AppendText(TituloPDF) as WTextRange;
+            textRange.CharacterFormat.FontSize = 20f;
+            textRange.CharacterFormat.FontName = "Calibri";
+            textRange.CharacterFormat.TextColor = Syncfusion.Drawing.Color.Blue;
+
+            // Crear table
+            IWTable table = section.AddTable();
+            int numeroCabeceras = Cabeceras.Length;
+            int numeroFilas = Datos.Length;
+            table.ResetCells(numeroFilas + 1, numeroCabeceras);
+
+            for (int i = 0; i < numeroCabeceras; i++)
+            {
+                table[0, i].AddParagraph().AppendText(Cabeceras[i]);
+            }
+
+            int fila = 1;
+            int columna = 0;
+            foreach (var dato in Datos)
+            {
+                columna = 0;
+                foreach (var propiedad in ColumnasMostrar)
+                {
+                    if (dato.GetType().GetProperty(propiedad).GetValue(dato) != null)
+                    {
+                        table[fila, columna].AddParagraph().AppendText(dato.GetType().GetProperty(propiedad).GetValue(dato).ToString());
+                    }
+                    columna++;
+                }
+
+                fila++;
+            }
+
+            document.Save(ms, FormatType.Docx);
+
+            byte[] buffer = ms.ToArray();
+            string base64 = Convert.ToBase64String(buffer);
+
+            Word = $"data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{base64}";
+
+
         }
     }
 

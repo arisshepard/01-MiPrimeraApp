@@ -1,0 +1,22 @@
+﻿@page "/agregarLibro"
+
+@inject HttpClient http
+
+<LibroForm Autores=autores />
+
+@code {
+
+    #region "Propiedades"
+    private List<_01_MiPrimeraApp.Shared.Autor> autores = new List<_01_MiPrimeraApp.Shared.Autor>();
+    #endregion
+
+    #region "Métodos"
+
+    protected override async Task OnInitializedAsync()
+    {
+        autores = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.Autor>>("api/Autor/Get");
+
+        // TODO: cargando
+    }
+    #endregion
+}

@@ -15,6 +15,8 @@ namespace _01_MiPrimeraApp.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+            builder.Services.AddSingleton<CurrieTechnologies.Razor.SweetAlert2.SweetAlertService>();
+
             await builder.Build().RunAsync();
         }
     }

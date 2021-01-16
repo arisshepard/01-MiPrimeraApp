@@ -1,0 +1,10 @@
+﻿@inject CurrieTechnologies.Razor.SweetAlert2.SweetAlertService Swal ;
+
+<button class="btn btn-primary"
+        @onclick="(async () => await Swal.FireAsync(" Any fool can use a computer"))">
+    Try me!
+</button>
+
+@code {
+
+}

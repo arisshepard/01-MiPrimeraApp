@@ -1,0 +1,151 @@
+﻿@using _01_MiPrimeraApp.Shared;
+
+@inject HttpClient http;
+@inject NavigationManager navigationManager;
+@inject IJSRuntime js;
+
+
+@{
+    string foto = Libro.Fotocaratula;
+    string archivo = Libro.Libropdf;
+}
+
+<EditForm Model=Libro OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    @*<ValidationSummary />*@
+
+    <div class="mb-3">
+        <label class="form-label">ID</label>
+        <InputNumber @bind-Value=Libro.ID class="form-control" readOnly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText @bind-Value=Libro.Titulo class="form-control" />
+        <ValidationMessage For="@(() => Libro.Titulo)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Resumen</label>
+        <InputTextArea @bind-Value=Libro.Resumen class="form-control" />
+        <ValidationMessage For="@(() => Libro.Resumen)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Páginas</label>
+        <InputNumber @bind-Value=Libro.Numpaginas class="form-control" />
+        <ValidationMessage For="@(() => Libro.Numpaginas)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Stock</label>
+        <InputNumber @bind-Value=Libro.Stock class="form-control" />
+        <ValidationMessage For="@(() => Libro.Stock)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Autor</label>
+        <InputSelect class="form-select" @bind-Value=Libro.IDAutor>
+            <option value="">-- Seleccione --</option>
+            @foreach (var autor in Autores)
+            {
+                <option value=@autor.ID>@autor.Nombre</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Libro.IDAutor)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Foto de portada</label>
+
+        <div class="card flex-row flex-wrap">
+
+            <div class="card-header border-0">
+                <img alt="" id="imgFoto" height="100" src=@foto>
+            </div>
+            <div class="card-block px-2">
+                <input type="file" accept="image/png,image/jpg,image/jpeg" id="fuFoto"  @onchange="previewImagen" />
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Extracto</label>
+
+        <div class="card flex-row flex-wrap">
+            <div class="card-header border-0">
+                <iframe style="display:block" id="ifArchivo" src=@archivo></iframe>
+            </div>
+            <div class="card-block px-2">
+                <input accept="application/pdf" type="file" id="fuArchivo" @onchange="previewArchivo" />
+            </div>
+        </div>
+    </div>
+
+    <BotoneraBasica PaginaVolver="/libros" />
+</EditForm>
+
+
+@code {
+    #region "Parámetros"
+    [Parameter]
+    public _01_MiPrimeraApp.Shared.Libro Libro { get; set; } = new _01_MiPrimeraApp.Shared.Libro();
+
+    [Parameter]
+    public List<Autor> Autores { get; set; } = new List<Autor>();
+    #endregion
+
+    #region "Propiedades"
+    //private List<Autor> autores = new List<Autor>();
+
+    //private string imagen { get; set; }
+    //private string archivo { get; set; }
+    #endregion
+
+    #region "Métodos"
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    //autores = await http.GetFromJsonAsync<List<Autor>>("api/Autor/Get");
+    //}
+
+    private async Task Guardar()
+    {
+        string imagen = await js.InvokeAsync<string>("obtenerImagen");
+        string archivo = await js.InvokeAsync<string>("obtenerArchivo");
+
+        Libro.Fotocaratula = imagen;
+        Libro.Libropdf = archivo;
+
+        HttpResponseMessage respuestaHttp;
+
+        if (Libro.ID == 0)
+        {
+            respuestaHttp = await http.PostAsJsonAsync("api/libros/create", Libro);
+        }
+        else
+        {
+            respuestaHttp = await http.PutAsJsonAsync($"api/libros/updateById/{Libro.ID}", Libro);
+        }
+
+        var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+        int rpta = int.Parse(content.ToString());
+
+        if (rpta == 1)
+        {
+            navigationManager.NavigateTo("/libros");
+        }
+
+    }
+
+    private async Task previewImagen()
+    {
+        await js.InvokeVoidAsync("previewImagen");
+    }
+
+    private async Task previewArchivo()
+    {
+        await js.InvokeVoidAsync("previewArchivo");
+    }
+    #endregion
+}

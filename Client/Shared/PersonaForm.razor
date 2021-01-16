@@ -4,7 +4,7 @@
 
 <EditForm Model=Persona OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    @*<ValidationSummary />*@
 
     <div class="mb-3">
         <label class="form-label">ID</label>
@@ -14,31 +14,37 @@
     <div class="mb-3">
         <label class="form-label">Nombre</label>
         <InputText @bind-Value=Persona.NombreSimple class="form-control" />
+        <ValidationMessage For="@(() => Persona.NombreSimple )" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Primer Apellido</label>
         <InputText @bind-Value=Persona.PrimerApellido class="form-control" />
+        <ValidationMessage For="@(() => Persona.PrimerApellido )" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Segundo Apellido</label>
         <InputText @bind-Value=Persona.SegundoApellido class="form-control" />
+        <ValidationMessage For="@(() => Persona.SegundoApellido )" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Teléfono</label>
         <InputText @bind-Value=Persona.Telefono class="form-control" />
+        <ValidationMessage For="@(() => Persona.Telefono )" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Email</label>
         <InputText @bind-Value=Persona.Email class="form-control" />
+        <ValidationMessage For="@(() => Persona.Email )" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Fecha Nacimiento</label>
         <InputDate @bind-Value=Persona.Fecha class="form-control" />
+        <ValidationMessage For="@(() => Persona.Fecha )" />
     </div>
 
     @*<button type="submit" class="btn btn-primary">
@@ -52,7 +58,6 @@
         </NavLink>*@
 
     <BotoneraBasica PaginaVolver="/personas" />
-
 </EditForm>
 
 @code {

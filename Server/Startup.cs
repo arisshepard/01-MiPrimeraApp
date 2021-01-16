@@ -1,4 +1,5 @@
 using _01_MiPrimeraApp.Server.Models;
+using CurrieTechnologies.Razor.SweetAlert2;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,7 @@ namespace _01_MiPrimeraApp.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddSweetAlert2();
             services.AddControllersWithViews();
             services.AddRazorPages();
 

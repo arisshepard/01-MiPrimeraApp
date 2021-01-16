@@ -1,10 +1,14 @@
-﻿@using _01_MiPrimeraApp.Shared 
+﻿@using _01_MiPrimeraApp.Shared
+@using CurrieTechnologies.Razor.SweetAlert2;
+
 @inject HttpClient http
 @inject NavigationManager navigationManager;
 
+@inject SweetAlertService Swal;
+
 <EditForm Model=tipoLibro OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    @*<ValidationSummary />*@
 
     <div class="mb-3">
         <label class="form-label">ID</label>
@@ -14,11 +18,13 @@
     <div class="mb-3">
         <label class="form-label">Nombre</label>
         <InputText @bind-Value=tipoLibro.Nombre class="form-control" />
+        <ValidationMessage For="@(() => tipoLibro.Nombre)" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Descripción</label>
         <InputText @bind-Value=tipoLibro.Descripcion class="form-control" />
+        <ValidationMessage For="@(() => tipoLibro.Descripcion)" />
     </div>
 
     @*<button type="submit" class="btn btn-primary">
@@ -31,7 +37,6 @@
             </button>
         </NavLink>*@
 
-
     <BotoneraBasica PaginaVolver="/tiposLibro" />
 </EditForm>
 
@@ -41,15 +46,68 @@
 
     public async Task Guardar()
     {
-        var respuesta = await http.PostAsJsonAsync("api/TipoLibro/Save", tipoLibro);
+        bool editando = tipoLibro.ID != 0;
+        bool continuar = true;
 
-        var content = await respuesta.Content.ReadFromJsonAsync<object>();
-
-        int rpta = int.Parse(content.ToString());
-
-        if (rpta == 1)
+        if (editando)
         {
-            navigationManager.NavigateTo("/tiposLibro");
+
+
+            SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Guardarás los cambios sobre el tipo de libro",
+                Icon = SweetAlertIcon.Info,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Aceptar",
+                CancelButtonText = "Cancelar",
+
+            });
+
+            continuar = !string.IsNullOrEmpty(result.Value);
         }
+
+        if (continuar)
+        {
+            var respuesta = await http.PostAsJsonAsync("api/TipoLibro/Save", tipoLibro);
+
+            var content = await respuesta.Content.ReadFromJsonAsync<object>();
+
+            int rpta = int.Parse(content.ToString());
+
+            if (editando)
+            {
+                await Swal.FireAsync(
+                    "Cambios realizados",
+                    "Los cambios se han guardado correctamente",
+                    SweetAlertIcon.Success
+                    );
+            }
+
+            if (rpta == 1)
+            {
+                navigationManager.NavigateTo("/tiposLibro");
+            }
+
+        }
+        //else if (result.Dismiss == DismissReason.Cancel)
+        //{
+        //    await Swal.FireAsync(
+        //      "Cancelled",
+        //      "Your imaginary file is safe :)",
+        //      SweetAlertIcon.Error
+        //      );
+        //}
+
+        //var respuesta = await http.PostAsJsonAsync("api/TipoLibro/Save", tipoLibro);
+
+        //var content = await respuesta.Content.ReadFromJsonAsync<object>();
+
+        //int rpta = int.Parse(content.ToString());
+
+        //if (rpta == 1)
+        //{
+        //    navigationManager.NavigateTo("/tiposLibro");
+        //}
     }
 }
