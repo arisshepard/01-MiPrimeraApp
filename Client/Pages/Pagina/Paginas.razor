@@ -1,0 +1,58 @@
+﻿@page "/paginas"
+@using _01_MiPrimeraApp.Shared;
+
+@inject HttpClient http;
+
+<Lista Boton=false
+       Cabeceras=cabeceras
+       Cargando=cargando
+       ColumnasMostrar=columnasMostrar
+       Datos=paginas
+       eventBusqueda="Buscar"
+       eventEliminar="Eliminar"
+       Mensaje="Ingrese nombre página"
+       permitirAgregar=true
+       permitirEditar=true
+       permitirEliminar=true
+       rutaAgregar="agregarPagina"
+       rutaEditar="editarPagina"
+       Tipo="text"
+       />
+
+@code {
+    #region "Propiedades"
+    private string[] cabeceras = { "ID", "Mensaje", "Acción", "Nombre" };
+    private bool cargando = true;
+    private string[] columnasMostrar = { "ID", "Mensaje", "Accion", "NombreVisible" };
+
+    private Pagina[] paginas;
+    #endregion
+
+    #region "Métodos"
+    private async Task Buscar(string texto)
+    {
+        cargando = true;
+        paginas = await http.GetFromJsonAsync<Pagina[]>($"api/Pagina/Filter/{texto}");
+        cargando = false;
+    }
+
+    private async Task Eliminar(string ID)
+    {
+        cargando = true;
+        int respuesta = await http.GetFromJsonAsync<int>($"api/Pagina/DeleteByID/{ID}");
+
+        if (respuesta == 1)
+        {
+            paginas = await http.GetFromJsonAsync<Pagina[]>("api/Pagina/GetAll");
+        }
+
+        cargando = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        paginas = await http.GetFromJsonAsync<Pagina[]>("api/Pagina/GetAll");
+        cargando = false;
+    }
+    #endregion
+}

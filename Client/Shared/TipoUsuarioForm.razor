@@ -1,0 +1,148 @@
+﻿@using _01_MiPrimeraApp.Shared;
+@using CurrieTechnologies.Razor.SweetAlert2;
+
+@inject HttpClient http;
+@inject NavigationManager navigationManager;
+@inject SweetAlertService Swal;
+
+<EditForm Model=TipoUsuario OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">ID</label>
+        <InputNumber @bind-Value=TipoUsuario.ID class="form-control" readOnly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText @bind-Value=TipoUsuario.Nombre class="form-control" />
+        <ValidationMessage For="@(() => TipoUsuario.Nombre)" />
+    </div>
+
+    @*<InputTextForm Titulo="Nombre" Propiedad=@TipoUsuario.Nombre />*@
+
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <InputText @bind-Value=TipoUsuario.Descripcion class="form-control" />
+        <ValidationMessage For="@(() => TipoUsuario.Descripcion)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Cabeceras</label>
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle">
+                <thead>
+                    <tr>
+                        <td>Opción</td>
+                        <td>Nombre página</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var pagina in paginas)
+                    {
+                        <tr>
+                            <td>
+                                @{ 
+                                    bool isChecked = TipoUsuario.PaginasID.Contains(pagina.ID);
+                                }
+
+                                <input type="checkbox" class="form-check-input" @onchange="() => SeleccionarPagina(pagina.ID)" checked="@isChecked"  />
+
+                            </td>
+                            <td>@pagina.Mensaje</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <BotoneraBasica PaginaVolver="/tiposUsuario" />
+</EditForm>
+
+@code {
+
+    #region "Parámetros"
+    [Parameter]
+    public TipoUsuario TipoUsuario { get; set; } = new TipoUsuario();
+
+    #endregion
+
+    #region "Propiedades"
+    private List<_01_MiPrimeraApp.Shared.Pagina> paginas { get; set; } = new List<Pagina>();
+    #endregion
+
+    #region "Métodos"
+    protected override async Task OnInitializedAsync()
+    {
+        paginas = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.Pagina>>($"api/Pagina/GetAll");
+    }
+
+    private async Task Guardar()
+    {
+        bool editando = TipoUsuario.ID != 0;
+        bool continuar = true;
+
+        if (editando)
+        {
+
+            SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Guardarás los cambios sobre el tipo de usuario",
+                Icon = SweetAlertIcon.Info,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Aceptar",
+                CancelButtonText = "Cancelar",
+
+            });
+
+            continuar = !string.IsNullOrEmpty(result.Value);
+        }
+
+        if (continuar)
+        {
+            HttpResponseMessage respuestaHttp;
+
+            if (TipoUsuario.ID == 0)
+            {
+                respuestaHttp = await http.PostAsJsonAsync("api/TipoUsuario/Create", TipoUsuario);
+            }
+            else
+            {
+                respuestaHttp = await http.PutAsJsonAsync($"api/TipoUsuario/UpdateById/{TipoUsuario.ID}", TipoUsuario);
+            }
+
+            var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+            int rpta = int.Parse(content.ToString());
+
+            if (rpta == 1)
+            {
+
+                await Swal.FireAsync(
+                    "Hecho",
+                    "Los cambios han sido guardados correctamente.",
+                    SweetAlertIcon.Success
+                    );
+
+                navigationManager.NavigateTo("/tiposUsuario");
+            }
+        }
+    }
+
+    private void  SeleccionarPagina(int ID)
+    {
+        if (TipoUsuario.PaginasID.Contains(ID))
+        {
+            TipoUsuario.PaginasID.Remove(ID);
+        }
+        else
+        {
+            TipoUsuario.PaginasID.Add(ID);
+        }
+    }
+
+
+    #endregion
+}

@@ -1,0 +1,25 @@
+﻿@page "/editarPagina/{ID}"
+
+@using _01_MiPrimeraApp.Shared;
+@inject HttpClient http;
+
+
+<PaginaForm Pagina=pagina/>
+
+@code {
+    #region "Parámetros"
+    [Parameter]
+    public string ID { get; set; }
+    #endregion
+
+    #region "Propiedades"
+    private Pagina pagina = new Pagina();
+    #endregion
+
+    #region "Métodos"
+    protected override async Task OnParametersSetAsync()
+    {
+        pagina = await http.GetFromJsonAsync<Pagina>($"api/Pagina/GetById/{ID}");
+    }
+    #endregion
+}

@@ -1,0 +1,58 @@
+﻿@page "/tiposUsuario"
+
+@using _01_MiPrimeraApp.Shared;
+@inject HttpClient http;
+
+<Lista Boton=false
+       Cabeceras=cabeceras
+       Cargando=cargando
+       ColumnasMostrar=columnasMostrar
+       Datos=tiposUsuario
+       eventBusqueda="Buscar"
+       eventEliminar="Eliminar"
+       Mensaje="Ingrese tipo de usuario"
+       permitirAgregar=true
+       permitirEditar=true
+       permitirEliminar=true
+       rutaAgregar="agregarTipoUsuario"
+       rutaEditar="editarTipoUsuario"
+       Tipo="text" />
+
+@code {
+    #region "Propiedades"
+    private string[] cabeceras = { "ID", "Nombre", "Descripción" };
+    private bool cargando = true;
+    private string[] columnasMostrar = { "ID", "Nombre", "Descripcion"};
+
+    private TipoUsuario[] tiposUsuario;
+    #endregion
+
+    #region "Métodos"
+    private async Task Buscar(string texto)
+    {
+        cargando = true;
+        tiposUsuario = await http.GetFromJsonAsync<TipoUsuario[]>($"api/TipoUsuario/Filter/{texto}");
+        cargando = false;
+    }
+
+    private async Task Eliminar(string ID)
+    {
+        cargando = true;
+        int respuesta = await http.GetFromJsonAsync<int>($"api/TipoUsuario/DeleteByID/{ID}");
+
+        if (respuesta == 1)
+        {
+            tiposUsuario = await http.GetFromJsonAsync<TipoUsuario[]>("api/TipoUsuario/GetAll");
+        }
+
+        cargando = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        tiposUsuario = await http.GetFromJsonAsync<TipoUsuario[]>("api/TipoUsuario/GetAll");
+        cargando = false;
+    }
+    #endregion
+}
+

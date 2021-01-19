@@ -1,11 +1,15 @@
+using _01_MiPrimeraApp.Server.Mappers;
 using _01_MiPrimeraApp.Server.Models;
+using _01_MiPrimeraApp.Server.Services;
 using CurrieTechnologies.Razor.SweetAlert2;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 
 namespace _01_MiPrimeraApp.Server
 {
@@ -28,6 +32,8 @@ namespace _01_MiPrimeraApp.Server
 
             services.AddDbContext<BDBibliotecaContext>(options =>
                options.UseSqlServer(Configuration.GetConnectionString("BDBiblioteca")));
+
+            ServiciosTiposUsuario(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,6 +63,14 @@ namespace _01_MiPrimeraApp.Server
                 endpoints.MapControllers();
                 endpoints.MapFallbackToFile("index.html");
             });
+        }
+
+        private void ServiciosTiposUsuario(IServiceCollection services)
+        {
+            services.TryAddSingleton<IMapper<TipoUsuario, Shared.TipoUsuario>, TipoUsuarioMapper>();
+            services.TryAddSingleton<IMapper<IEnumerable<TipoUsuario>, IEnumerable<Shared.TipoUsuario>>, EnumerableMapper<TipoUsuario, Shared.TipoUsuario>>();
+
+            services.TryAddSingleton<ITipoUsuarioMappingService, TipoUsuarioMappingService>();
         }
     }
 }

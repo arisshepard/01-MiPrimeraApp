@@ -1,0 +1,25 @@
+﻿@page "/editarTipoUsuario/{ID}"
+
+@using _01_MiPrimeraApp.Shared;
+@inject HttpClient http;
+
+
+<TipoUsuarioForm TipoUsuario=tipoUsuario />
+
+@code {
+    #region "Parámetros"
+    [Parameter]
+    public string ID { get; set; }
+    #endregion
+
+    #region "Propiedades"
+    private TipoUsuario tipoUsuario = new TipoUsuario();
+    #endregion
+
+    #region "Métodos"
+    protected override async Task OnParametersSetAsync()
+    {
+        tipoUsuario = await http.GetFromJsonAsync<TipoUsuario>($"api/TipoUsuario/GetById/{ID}");
+    }
+    #endregion
+}

@@ -1,0 +1,93 @@
+﻿@using _01_MiPrimeraApp.Shared;
+@using CurrieTechnologies.Razor.SweetAlert2;
+
+@inject HttpClient http;
+@inject NavigationManager navigationManager;
+@inject SweetAlertService Swal;
+
+<EditForm Model=Pagina OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">ID</label>
+        <InputNumber @bind-Value=Pagina.ID class="form-control" readOnly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mensaje</label>
+        <InputText @bind-Value=Pagina.Mensaje class="form-control" />
+        <ValidationMessage For="@(() => Pagina.Mensaje)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Acción</label>
+        <InputText @bind-Value=Pagina.Accion class="form-control" />
+        <ValidationMessage For="@(() => Pagina.Accion)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Visible</label>
+        <InputCheckbox @bind-Value=Pagina.Visible class="form-check-input" />
+    </div>
+
+    <BotoneraBasica PaginaVolver="/paginas" />
+</EditForm>
+
+@code {
+
+    #region "Parámetros"
+    [Parameter]
+    public Pagina Pagina { get; set; } = new Pagina();
+    #endregion
+
+    #region "Propiedades"
+    #endregion
+
+    #region "Métodos"
+    private async Task Guardar()
+    {
+        bool editando = Pagina.ID != 0;
+        bool continuar = true;
+
+        if (editando)
+        {
+
+            SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Guardarás los cambios sobre la página",
+                Icon = SweetAlertIcon.Info,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Aceptar",
+                CancelButtonText = "Cancelar",
+
+            });
+
+            continuar = !string.IsNullOrEmpty(result.Value);
+        }
+
+        if (continuar)
+        {
+            HttpResponseMessage respuestaHttp;
+
+            if (Pagina.ID == 0)
+            {
+                respuestaHttp = await http.PostAsJsonAsync("api/Pagina/Create", Pagina);
+            }
+            else
+            {
+                respuestaHttp = await http.PutAsJsonAsync($"api/Pagina/UpdateById/{Pagina.ID}", Pagina);
+            }
+
+            var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+            int rpta = int.Parse(content.ToString());
+
+            if (rpta == 1)
+            {
+                navigationManager.NavigateTo("/paginas");
+            }
+        }
+    }
+    #endregion
+}

@@ -1,0 +1,13 @@
+﻿<div class="mb-3">
+    <label class="form-label">@Titulo</label>
+    <InputText @bind-Value=@Propiedad class="form-control" />
+    <ValidationMessage For="@(() => Propiedad)" />
+</div>
+
+@code {
+    [Parameter]
+    public string Propiedad { get; set; }
+
+    [Parameter]
+    public string Titulo { get; set; }
+}
