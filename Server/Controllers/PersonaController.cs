@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace _01_MiPrimeraApp.Server.Controllers
@@ -51,19 +53,26 @@ namespace _01_MiPrimeraApp.Server.Controllers
         [Route("api/Persona/GetById/{id}")]
         public async Task<ActionResult<Shared.Persona>> GetByIdAsync(int id)
         {
-            Shared.Persona persona = await _context.Persona
-                .Where(persona => persona.Iidpersona == id)
-                .Select(persona => new Shared.Persona
-                {
-                    Email = persona.Correo,
-                    Fecha = (DateTime)persona.Fechanacimiento,
-                    NombreSimple = persona.Nombre,
-                    PrimerApellido = persona.Appaterno,
-                    SegundoApellido = persona.Apmaterno,
-                    Telefono = persona.Telefono,
-                    ID = persona.Iidpersona
-                })
-                .FirstOrDefaultAsync();
+
+            Shared.Persona persona = await (from personaDb 
+                                            in _context.Persona
+                                            join usuarioDb in _context.Usuario
+                                            on personaDb.Iidpersona equals usuarioDb.Iidpersona
+                                            where personaDb.Iidpersona == id
+                                            select new Shared.Persona()
+                                            {
+                                                Email = personaDb.Correo,
+                                                Fecha = (DateTime)personaDb.Fechanacimiento,
+                                                NombreSimple = personaDb.Nombre,
+                                                PrimerApellido = personaDb.Appaterno,
+                                                SegundoApellido = personaDb.Apmaterno,
+                                                Telefono = personaDb.Telefono,
+                                                ID = personaDb.Iidpersona,
+                                                NombreUsuario = usuarioDb.Nombreusuario,
+                                                IDTipoUsuario = usuarioDb.Iidtipousuario.ToString()
+                                                
+                                            })
+                                            .FirstOrDefaultAsync();
 
             return persona;
         }
@@ -128,8 +137,11 @@ namespace _01_MiPrimeraApp.Server.Controllers
             int respuesta = 0;
             try
             {
+                _context.Database.BeginTransaction();
                 if (persona.ID == 0)
                 {
+
+
                     Persona personaBD = new Persona
                     {
                         Apmaterno = persona.SegundoApellido,
@@ -139,9 +151,29 @@ namespace _01_MiPrimeraApp.Server.Controllers
                         Telefono = persona.Telefono,
                         Fechanacimiento = persona.Fecha,
                         Bhabilitado = 1,
-                        Btieneusuario = 0
+                        Btieneusuario = 1
                     };
                     _context.Persona.Add(personaBD);
+                    await _context.SaveChangesAsync();
+
+                    // Encriptado
+                    string clave = persona.PasswordUsuario;
+                    SHA256Managed sha = new SHA256Managed();
+                    byte[] buffer = Encoding.Default.GetBytes(clave);
+                    byte[] passwordCifrada = sha.ComputeHash(buffer);                    
+
+                    // Usuario asociado
+                    Usuario usuarioDb = new Usuario()
+                    {
+                        Bhabilitado = 1,
+                        Contra = BitConverter.ToString(passwordCifrada).Replace("-", ""),
+                        Iidpersona = personaBD.Iidpersona,
+                        Iidtipousuario = int.Parse(persona.IDTipoUsuario),
+                        Nombreusuario = persona.NombreUsuario                        
+                };
+                    _context.Usuario.Add(usuarioDb);
+                    // await _context.SaveChangesAsync();
+
                 }
                 else
                 {
@@ -155,11 +187,21 @@ namespace _01_MiPrimeraApp.Server.Controllers
                     personaBD.Nombre = persona.NombreSimple;
                     personaBD.Telefono = persona.Telefono;
                     personaBD.Fechanacimiento = persona.Fecha;
+
+                    // Usuario
+                    Usuario usuarioDb = await _context.Usuario
+                        .Where(usuario => usuario.Iidpersona == personaBD.Iidpersona)
+                        .FirstOrDefaultAsync();
+
+                    usuarioDb.Nombreusuario = persona.NombreUsuario;
+                    usuarioDb.Iidtipousuario = int.Parse(persona.IDTipoUsuario);
                 }
 
                 await _context.SaveChangesAsync();
 
                 respuesta = 1;
+
+                _context.Database.CommitTransaction();
             }
             catch (Exception ex)
             {

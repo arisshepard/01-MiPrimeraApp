@@ -1,0 +1,15 @@
+﻿@page "/editarPaginaTipoUsuario/{ID}"
+@inject HttpClient http;
+
+<PaginaTipoUsuarioForm PaginaTipoUsuario=paginaTipoUsuario />
+
+@code {
+    [Parameter] public string ID { get; set; }
+
+    private _01_MiPrimeraApp.Shared.PaginaTipoUsuario paginaTipoUsuario = new _01_MiPrimeraApp.Shared.PaginaTipoUsuario();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        paginaTipoUsuario = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.PaginaTipoUsuario>($"api/PaginasTipoUsuario/GetById/{ID}");
+    }
+}

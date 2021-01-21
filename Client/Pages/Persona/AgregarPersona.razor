@@ -1,7 +1,22 @@
 ﻿@page "/agregarPersona"
+@inject HttpClient http
 
-<PersonaForm />
+<PersonaForm TiposUsuario=tiposUsuario />
 
 @code {
+    #region "Propiedades"
+    private List<_01_MiPrimeraApp.Shared.TipoUsuario> tiposUsuario { get; set; } = new List<_01_MiPrimeraApp.Shared.TipoUsuario>();
+    #endregion
 
+    #region "Métodos"
+
+    protected override async Task OnInitializedAsync()
+    {
+        tiposUsuario = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.TipoUsuario>>("api/TipoUsuario/GetAll");
+
+        // TODO: cargando
+    }
+
+
+    #endregion
 }

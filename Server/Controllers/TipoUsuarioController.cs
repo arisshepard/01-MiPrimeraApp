@@ -13,10 +13,10 @@ namespace _01_MiPrimeraApp.Server.Controllers
     public class TipoUsuarioController : Controller
     {
         private readonly BDBibliotecaContext _context;
-        private readonly ITipoUsuarioMappingService _mappingService;
+        private readonly IEntityMappingService<TipoUsuario, Shared.TipoUsuario> _mappingService;
 
         public TipoUsuarioController(BDBibliotecaContext context,
-            ITipoUsuarioMappingService mappingService)
+            IEntityMappingService<TipoUsuario, Shared.TipoUsuario> mappingService)
         {
             _context = context;
             _mappingService = mappingService;

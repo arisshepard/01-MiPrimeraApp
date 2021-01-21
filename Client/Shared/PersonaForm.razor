@@ -4,7 +4,6 @@
 
 <EditForm Model=Persona OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
-    @*<ValidationSummary />*@
 
     <div class="mb-3">
         <label class="form-label">ID</label>
@@ -47,15 +46,32 @@
         <ValidationMessage For="@(() => Persona.Fecha )" />
     </div>
 
-    @*<button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Guardar
-        </button>
+    <div class="mb-3">
+        <label class="form-label">Usuario</label>
+        <InputText @bind-Value=Persona.NombreUsuario class="form-control" />
+        <ValidationMessage For="@(() => Persona.NombreUsuario )" />
+    </div>
 
-        <NavLink href="/personas">
-            <button type="button" class="btn btn-danger">
-                <i class="fas fa-arrow-left"></i> Volver
-            </button>
-        </NavLink>*@
+    @if (contraseñaVisible)
+    {
+    <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <InputText @bind-Value=Persona.PasswordUsuario class="form-control" type="password" />
+        <ValidationMessage For="@(() => Persona.PasswordUsuario )" />
+    </div>
+    }
+
+    <div class="mb-3">
+        <label class="form-label">Tipo Usuario</label>
+        <InputSelect @bind-Value=Persona.IDTipoUsuario class="form-control form-select">
+            <option value="">-- Seleccione --</option>
+            @foreach (var tipo in TiposUsuario)
+            {
+                <option value=@tipo.ID>@tipo.Nombre</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Persona.IDTipoUsuario)" />
+    </div>
 
     <BotoneraBasica PaginaVolver="/personas" />
 </EditForm>
@@ -64,6 +80,13 @@
     #region "Parámetros"
     [Parameter]
     public Persona Persona { get; set; } = new Persona();
+
+
+    [Parameter]
+    public List<TipoUsuario> TiposUsuario { get; set; } = new List<TipoUsuario>();
+
+    [Parameter]
+    public bool contraseñaVisible { get; set; }= true;
     #endregion
 
     #region "Métodos"

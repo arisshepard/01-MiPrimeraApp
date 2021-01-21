@@ -310,7 +310,7 @@ else
     public bool PermitirExportarWord { get; set; }
 
     [Parameter]
-    public string TituloPDF { get; set; }
+    public string TituloInforme { get; set; }
 
     // PAGINADO
 
@@ -432,7 +432,7 @@ else
             using (PdfDocument pdfDoc = new PdfDocument(writer))
             {
                 Document doc = new Document(pdfDoc);
-                Paragraph p1 = new Paragraph(TituloPDF);
+                Paragraph p1 = new Paragraph(TituloInforme);
                 p1.SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
                 p1.SetFontSize(20);
 
@@ -494,7 +494,7 @@ else
 
             paragraph.ApplyStyle("Normal");
             paragraph.ParagraphFormat.HorizontalAlignment = HorizontalAlignment.Center;
-            WTextRange textRange = paragraph.AppendText(TituloPDF) as WTextRange;
+            WTextRange textRange = paragraph.AppendText(TituloInforme) as WTextRange;
             textRange.CharacterFormat.FontSize = 20f;
             textRange.CharacterFormat.FontName = "Calibri";
             textRange.CharacterFormat.TextColor = Syncfusion.Drawing.Color.Blue;

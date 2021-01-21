@@ -1,7 +1,7 @@
 ﻿@page "/editarPersona/{ID}"
 @inject HttpClient http
 
-<PersonaForm Persona=persona />
+<PersonaForm Persona=persona TiposUsuario=tiposUsuario contraseñaVisible=false />
 
 @code {
     #region "Parámetros"
@@ -11,12 +11,15 @@
 
     #region "Propiedades"
     private _01_MiPrimeraApp.Shared.Persona persona = new _01_MiPrimeraApp.Shared.Persona();
+    private List<_01_MiPrimeraApp.Shared.TipoUsuario> tiposUsuario { get; set; } = new List<_01_MiPrimeraApp.Shared.TipoUsuario>();
     #endregion
 
     #region "Métodos sobrescritos"
     protected async override Task OnParametersSetAsync()
     {
         persona = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Persona>($"api/Persona/GetById/{ID}");
+        tiposUsuario = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.TipoUsuario>>("api/TipoUsuario/GetAll");
+
     }
     #endregion
 }

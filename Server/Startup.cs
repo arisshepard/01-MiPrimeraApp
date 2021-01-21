@@ -33,6 +33,7 @@ namespace _01_MiPrimeraApp.Server
             services.AddDbContext<BDBibliotecaContext>(options =>
                options.UseSqlServer(Configuration.GetConnectionString("BDBiblioteca")));
 
+            ServiciosPaginasTipoUsuario(services);
             ServiciosTiposUsuario(services);
         }
 
@@ -65,12 +66,23 @@ namespace _01_MiPrimeraApp.Server
             });
         }
 
+        private void ServiciosPaginasTipoUsuario(IServiceCollection services)
+        {
+            services.TryAddSingleton<IMapper<PaginaTipoUsuario, Shared.PaginaTipoUsuario>, PaginaTipoUsuarioMapper>();
+            services.TryAddSingleton<IMapper<IEnumerable<PaginaTipoUsuario>, IEnumerable<Shared.PaginaTipoUsuario>>, EnumerableMapper<PaginaTipoUsuario, Shared.PaginaTipoUsuario>>();
+
+            //services.TryAddSingleton<IPaginaTipoUsuarioMappingService, PaginaTipoUsuarioMappingService>();
+
+            services.TryAddSingleton<IEntityMappingService<PaginaTipoUsuario, Shared.PaginaTipoUsuario>, EntityMappingService<PaginaTipoUsuario, Shared.PaginaTipoUsuario>>();
+        }
+
         private void ServiciosTiposUsuario(IServiceCollection services)
         {
             services.TryAddSingleton<IMapper<TipoUsuario, Shared.TipoUsuario>, TipoUsuarioMapper>();
             services.TryAddSingleton<IMapper<IEnumerable<TipoUsuario>, IEnumerable<Shared.TipoUsuario>>, EnumerableMapper<TipoUsuario, Shared.TipoUsuario>>();
 
-            services.TryAddSingleton<ITipoUsuarioMappingService, TipoUsuarioMappingService>();
+            //services.TryAddSingleton<ITipoUsuarioMappingService, TipoUsuarioMappingService>();
+            services.TryAddSingleton<IEntityMappingService<TipoUsuario, Shared.TipoUsuario>, EntityMappingService<TipoUsuario, Shared.TipoUsuario>>();
         }
     }
 }
