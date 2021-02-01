@@ -85,7 +85,7 @@ namespace _01_MiPrimeraApp.Server.Controllers
                                             IDAutor = autor.Iidautor.ToString(),
                                             Libropdf = libroDb.Libropdf,
                                             Numpaginas = libroDb.Numpaginas,
-                                            Resumen = libroDb.Resumen,
+                                            Resumen = libroDb.Resumen.Substring(0, 200),
                                             Stock = libroDb.Stock,
                                             Titulo = libroDb.Titulo
                                         }).FirstOrDefaultAsync();

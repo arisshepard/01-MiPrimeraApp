@@ -37,12 +37,15 @@
             </button>
         </NavLink>*@
 
-    <BotoneraBasica PaginaVolver="/tiposLibro" />
+    <BotoneraBasica PaginaVolver="@paginaEnviar" />
 </EditForm>
 
 @code {
     [Parameter]
     public _01_MiPrimeraApp.Shared.TipoLibro tipoLibro { get; set; } = new _01_MiPrimeraApp.Shared.TipoLibro();
+
+    private string paginaEnviar;
+
 
     public async Task Guardar()
     {
@@ -86,7 +89,7 @@
 
             if (rpta == 1)
             {
-                navigationManager.NavigateTo("/tiposLibro");
+                navigationManager.NavigateTo(paginaEnviar);
             }
 
         }
@@ -109,5 +112,15 @@
         //{
         //    navigationManager.NavigateTo("/tiposLibro");
         //}
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        paginaEnviar = "tiposLibro";
+
+        int idPagina = await http.GetJsonAsync<int>($"api/Pagina/GetId/{paginaEnviar}");
+        paginaEnviar = $"/{paginaEnviar}/{idPagina}";
+
     }
 }

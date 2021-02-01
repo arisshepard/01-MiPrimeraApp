@@ -1,15 +1,21 @@
 ﻿@inherits LayoutComponentBase
+    <AuthorizeView>
+        <Authorized>
+            <div class="sidebar">
+                <NavMenu UsuarioID="@context.User.Identity.Name" />
+            </div>
+        </Authorized>
+    </AuthorizeView>
 
-<div class="sidebar">
-    <NavMenu />
-</div>
-
-<div class="main">
-    <div class="top-row px-4">
-        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
+    <div class="main">
+        <AuthorizeView>
+            <Authorized>
+                <div class="top-row px-4 d-flex">
+                    <BotoneraLogin />
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <div class="content px-4">
+            @Body
+        </div>
     </div>
-
-    <div class="content px-4">
-        @Body
-    </div>
-</div>

@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager navigation;
 @inject IJSRuntime jsRuntime;
+@inject HttpClient http;
 
 @using System.IO;
 
@@ -15,57 +16,29 @@
 
 @if (Cargando)
 {
-    <div class="alert alert-info text-center" role="alert">
-        <i class="fas fa-sync-alt fa-spin" />
-        <p>Cargando datos, por favor espere...</p>
-    </div>
+    <AlertaCarga />
 }
 else
 {
-<div class="btn-toolbar justify-content-md-end mb-3">
-    @if (permitirAgregar)
-    {
-
-        <NavLink href="@rutaAgregar">
-            <button class="btn btn-primary fas fa-plus me-2"></button>
-        </NavLink>
-
-    }
-
-    @if (Datos != null && Datos.Any() && PermitirExportarEXCEL)
-    {
-        @*<a class="btn btn-secondary fas fa-file-csv" @onclick="ExportarExcel" href=@Excel></a>*@
-
-        <NavLink href=@Excel>
-            <button class="btn btn-success fas fa-file-csv me-2" @onclick="ExportarExcel"></button>
-        </NavLink>
-
-    }
-
-    @if (Datos != null && Datos.Any() && PermitirExportarWord)
-    {
-        <NavLink href=@Word>
-            <button class="btn btn-primary fas fa-file-word me-2" @onclick="ExportarWord"></button>
-        </NavLink>
-    }
-
-    @if (Datos != null && Datos.Any() && PermitirExportarPDF)
-    {
-        <NavLink href=@PDF>
-            <button class="btn btn-danger fas fa-file-pdf" @onclick="ExportarPDF"></button>
-        </NavLink>
-    }
-</div>
+    <AccionesToolbar Datos="@Datos"
+                     Excel="@Excel"
+                     ExportarExcel="@ExportarExcel"
+                     ExportarPDF="@ExportarPDF"
+                     ExportarWord="@ExportarWord"
+                     PDF="@PDF"
+                     PermitirAgregar="@permitirAgregar"
+                     PermitirExportarExcel="@permitirExportarExcel"
+                     PermitirExportarPDF="@permitirExportarPDF"
+                     PermitirExportarWord="@permitirExportarWord"
+                     RutaAgregar="@rutaAgregar"
+                     Word="@Word" />
 
     @if (Datos == null || !Datos.Any())
     {
-        <div class="alert alert-warning text-center" role="alert">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>No se han encontrado datos</p>
-        </div>
+        <AlertaNoDatos />
     }
     else
-    {        
+    {
 
         @if (Tipo != "none")
         {
@@ -136,7 +109,7 @@ else
 
                             <th>@cabecera</th>
                         }
-                        @if (permitirEliminar || permitirEditar)
+                        @if (permitirEliminar || permitirEditar || PermitirBotonUno || PermitirBotonDos)
                         {
                             <th>Operaciones</th>
                         }
@@ -190,10 +163,31 @@ else
 
                                 }
                                 <div class="btn-toolbar justify-content-md-center">
+                                    @if (PermitirBotonUno)
+                                    {
+                                        <button class="btn btn-outline-info fas @BotonUnoIcono me-2" @onclick="@(() => eventBotonUno.InvokeAsync(ID))"></button>
+                                    }
+
+                                    @if (PermitirBotonDos)
+                                    {
+                                        <button class="btn btn-outline-dark fas @BotonDosIcono me-2" @onclick="@(() => eventBotonDos.InvokeAsync(ID))"></button>
+                                    }
+
                                     @if (permitirEliminar)
                                     {
-                                        <button class="btn btn-outline-danger fas fa-trash me-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => PrepararEliminar(ID))"></button>
-                                        <MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />
+                                        @*<button class="btn btn-outline-danger fas fa-trash me-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => PrepararEliminar(ID))"></button>
+                                            <MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />*@
+
+                                        @if (!string.IsNullOrEmpty(@MensajeConfirmacion))
+                                        {
+                                            <button class="btn btn-outline-danger fas fa-trash me-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => PrepararEliminar(ID))"></button>
+                                            <MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-outline-danger fas fa-trash me-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop" @onclick="@(() => eventEliminar.InvokeAsync(ID))"></button>
+                                        }
+                                        @*<MensajeConfirmacion Mensaje=@MensajeConfirmacion Titulo="Eliminar" IDEntidad=@EntidadID eventAceptar="Eliminar" />*@
                                     }
                                     @if (permitirEditar)
                                     {
@@ -235,8 +229,6 @@ else
             </div>
         </div>
 
-
-
     }
 }
 
@@ -271,12 +263,12 @@ else
     [Parameter]
     public string Mensaje { get; set; } = "";
 
-    [Parameter]
-    public bool permitirAgregar { get; set; } = false;
-    [Parameter]
-    public bool permitirEditar { get; set; } = false;
-    [Parameter]
-    public bool permitirEliminar { get; set; } = false;
+    //[Parameter]
+    //public bool permitirAgregar { get; set; } = false;
+    //[Parameter]
+    //public bool permitirEditar { get; set; } = false;
+    //[Parameter]
+    //public bool permitirEliminar { get; set; } = false;
 
     [Parameter]
     public string EntidadID { get; set; }
@@ -285,6 +277,15 @@ else
 
     [Parameter]
     public EventCallback<string> eventEditar { get; set; }
+
+    [Parameter]
+    public EventCallback<string> eventBotonUno { get; set; }
+
+    [Parameter]
+    public EventCallback<string> eventBotonDos { get; set; }
+
+    [Parameter] public string BotonUnoIcono { get; set; }
+    [Parameter] public string BotonDosIcono { get; set; }
 
     [Parameter]
     public EventCallback<string> eventEliminar { get; set; }
@@ -300,14 +301,14 @@ else
     [Parameter]
     public string[] ColumnasMostrar { get; set; }
 
-    [Parameter]
-    public bool PermitirExportarEXCEL { get; set; }
+    //[Parameter]
+    //public bool PermitirExportarEXCEL { get; set; }
 
-    [Parameter]
-    public bool PermitirExportarPDF { get; set; }
+    //[Parameter]
+    //public bool PermitirExportarPDF { get; set; }
 
-    [Parameter]
-    public bool PermitirExportarWord { get; set; }
+    //[Parameter]
+    //public bool PermitirExportarWord { get; set; }
 
     [Parameter]
     public string TituloInforme { get; set; }
@@ -326,6 +327,47 @@ else
     private string PDF = "";
 
     private string Word = "";
+
+    private bool permitirAgregar;
+    private bool PermitirBotonUno;
+    private bool PermitirBotonDos;
+    private bool permitirEditar;
+    private bool permitirEliminar;
+    private bool permitirExportarExcel;
+    private bool permitirExportarWord;
+    private bool permitirExportarPDF;
+
+    [Parameter] public string IDPagina { get; set; }
+    [CascadingParameter] Task<AuthenticationState> auth { get; set; }
+
+    //[Inject]
+    //AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authUser = await auth;
+        var user = authUser.User;
+
+        //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        if (user.Identity.IsAuthenticated)
+        //if (authState.User.Identity.IsAuthenticated)
+        {
+            var botones = await http.GetFromJsonAsync<List<int>>($"api/PaginasTipoUsuario/GetButtons/{user.Identity.Name}/{IDPagina}");
+            if (botones.Any())
+            {
+                permitirAgregar = botones.Contains(1);
+                permitirEditar = botones.Contains(2);
+                permitirEliminar = botones.Contains(3);
+                permitirExportarExcel = botones.Contains(4);
+                permitirExportarWord = botones.Contains(5);
+                permitirExportarPDF = botones.Contains(6);
+
+                PermitirBotonUno = botones.Contains(7);
+                PermitirBotonDos = botones.Contains(8);
+            }
+        }
+    }
 
     private int numeroPaginas()
     {
@@ -479,7 +521,6 @@ else
         }
     }
 
-
     private void ExportarWord()
     {
         using (MemoryStream ms = new MemoryStream())
@@ -533,7 +574,6 @@ else
             string base64 = Convert.ToBase64String(buffer);
 
             Word = $"data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{base64}";
-
 
         }
     }

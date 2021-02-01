@@ -64,7 +64,7 @@
                 <img alt="" id="imgFoto" height="100" src=@foto>
             </div>
             <div class="card-block px-2">
-                <input type="file" accept="image/png,image/jpg,image/jpeg" id="fuFoto"  @onchange="previewImagen" />
+                <input type="file" accept="image/png,image/jpg,image/jpeg" id="fuFoto" @onchange="previewImagen" />
             </div>
         </div>
     </div>
@@ -82,7 +82,8 @@
         </div>
     </div>
 
-    <BotoneraBasica PaginaVolver="/libros" />
+    <BotoneraBasica PaginaVolver="@paginaEnviar" />
+
 </EditForm>
 
 
@@ -100,6 +101,8 @@
 
     //private string imagen { get; set; }
     //private string archivo { get; set; }
+    private string paginaEnviar;
+
     #endregion
 
     #region "Métodos"
@@ -133,7 +136,7 @@
 
         if (rpta == 1)
         {
-            navigationManager.NavigateTo("/libros");
+            navigationManager.NavigateTo(paginaEnviar);
         }
 
     }
@@ -146,6 +149,16 @@
     private async Task previewArchivo()
     {
         await js.InvokeVoidAsync("previewArchivo");
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        paginaEnviar = "libros";
+
+        int idPagina = await http.GetJsonAsync<int>($"api/Pagina/GetId/{paginaEnviar}");
+        paginaEnviar = $"/{paginaEnviar}/{idPagina}";
+
     }
     #endregion
 }

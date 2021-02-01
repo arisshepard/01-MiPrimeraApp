@@ -305,6 +305,8 @@ namespace _01_MiPrimeraApp.Server.Models
 
                 entity.Property(e => e.Iidusuario).HasColumnName("IIDUSUARIO");
 
+                entity.Property(e => e.Iidlibro).HasColumnName("IIDLIBRO");
+
                 entity.Property(e => e.Numlibros).HasColumnName("NUMLIBROS");
 
                 entity.HasOne(d => d.IidestadoreservaNavigation)
@@ -440,6 +442,11 @@ namespace _01_MiPrimeraApp.Server.Models
                     .HasColumnName("NOMBREUSUARIO")
                     .HasMaxLength(100)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Token)
+                  .HasColumnName("TOKEN")
+                  .HasMaxLength(100)
+                  .IsUnicode(false);
 
                 entity.HasOne(d => d.IidpersonaNavigation)
                     .WithMany(p => p.Usuario)

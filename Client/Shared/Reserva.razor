@@ -1,0 +1,76 @@
+﻿@inject HttpClient http;
+
+<EditForm Model=reservaModel OnValidSubmit="Guardar">
+    <Popup Titulo="Reserva" ID="reservaPopup">
+        <Body>
+
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">ID Libro</label>
+                <InputNumber @bind-Value=reservaModel.IDLibro class="form-control" readOnly />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Usuario</label>
+                <InputSelect @bind-Value=reservaModel.IDUsuario class="form-control form-select">
+                    <option value="">-- Seleccione --</option>
+                    @if (usuarios != null)
+                    {
+
+                        @foreach (var usuario in usuarios)
+                        {
+                            <option value=@usuario.ID>@usuario.Nombre</option>
+                        }
+
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => reservaModel.IDUsuario)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Cantidad</label>
+                <InputNumber @bind-Value=reservaModel.Cantidad class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fecha inicio</label>
+                <InputDate @bind-Value=reservaModel.FechaInicio class="form-control" />
+                <ValidationMessage For="@(() => reservaModel.FechaInicio )" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fecha Fin</label>
+                <InputDate @bind-Value=reservaModel.FechaFin class="form-control" />
+                <ValidationMessage For="@(() => reservaModel.FechaFin )" />
+            </div>
+            @*<div class="mb-3">
+                    <input type="submit" value="Guardar" class="btn btn-primary" />
+                </div>*@
+        </Body>
+    </Popup>
+</EditForm>
+@code {
+
+    [Parameter] public int IDLibro { get; set; }
+    [Parameter] public EventCallback<_01_MiPrimeraApp.Shared.Reserva> EventGuardar { get; set; }
+
+    private _01_MiPrimeraApp.Shared.Reserva reservaModel { get; set; } = new _01_MiPrimeraApp.Shared.Reserva();
+
+    private _01_MiPrimeraApp.Shared.Usuario[] usuarios { get; set; }
+
+    private async Task Guardar()
+    {
+        await EventGuardar.InvokeAsync(reservaModel);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Usuario[]>("api/Usuario/GetAll");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        reservaModel.IDLibro = IDLibro;
+    }
+}

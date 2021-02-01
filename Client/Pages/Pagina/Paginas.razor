@@ -1,8 +1,10 @@
-﻿@page "/paginas"
+﻿@page "/paginas/{IDPagina}"
 @using _01_MiPrimeraApp.Shared;
 
 @inject HttpClient http;
-
+@attribute [Authorize]
+@*<AuthorizeView>
+    <Authorized>*@
 <Lista Boton=false
        Cabeceras=cabeceras
        Cargando=cargando
@@ -10,14 +12,13 @@
        Datos=paginas
        eventBusqueda="Buscar"
        eventEliminar="Eliminar"
+       IDPagina=@IDPagina
        Mensaje="Ingrese nombre página"
-       permitirAgregar=true
-       permitirEditar=true
-       permitirEliminar=true
        rutaAgregar="agregarPagina"
        rutaEditar="editarPagina"
-       Tipo="text"
-       />
+       Tipo="text" />
+@*</Authorized>
+    </AuthorizeView>*@
 
 @code {
     #region "Propiedades"
@@ -26,6 +27,9 @@
     private string[] columnasMostrar = { "ID", "Mensaje", "Accion", "NombreVisible" };
 
     private Pagina[] paginas;
+
+    [Parameter] public string IDPagina { get; set; }
+
     #endregion
 
     #region "Métodos"

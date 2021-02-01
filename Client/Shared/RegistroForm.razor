@@ -1,0 +1,122 @@
+﻿@using _01_MiPrimeraApp.Shared
+@using CurrieTechnologies.Razor.SweetAlert2
+
+@inject HttpClient http;
+@inject NavigationManager navigationManager
+@inject SweetAlertService Swal
+
+<EditForm Model=UsuarioRegister OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        @error
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText @bind-Value=UsuarioRegister.NombreSimple class="form-control" />
+        <ValidationMessage For="@(() => UsuarioRegister.NombreSimple )" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Primer Apellido</label>
+        <InputText @bind-Value=UsuarioRegister.PrimerApellido class="form-control" />
+        <ValidationMessage For="@(() => UsuarioRegister.PrimerApellido )" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Segundo Apellido</label>
+        <InputText @bind-Value=UsuarioRegister.SegundoApellido class="form-control" />
+        <ValidationMessage For="@(() => UsuarioRegister.SegundoApellido )" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Teléfono</label>
+        <InputText @bind-Value=UsuarioRegister.Telefono class="form-control" />
+        <ValidationMessage For="@(() => UsuarioRegister.Telefono )" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText @bind-Value=UsuarioRegister.Email class="form-control" />
+        <ValidationMessage For="@(() => UsuarioRegister.Email )" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Fecha Nacimiento</label>
+        <InputDate @bind-Value=UsuarioRegister.Fecha class="form-control" />
+        <ValidationMessage For="@(() => UsuarioRegister.Fecha )" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <InputText @bind-Value=UsuarioRegister.PasswordUsuario class="form-control" type="password" />
+        <ValidationMessage For="@(() => UsuarioRegister.PasswordUsuario )" />
+    </div>
+
+    <BotoneraBasica PaginaVolver="/" />
+</EditForm>
+
+@code {
+    #region "Parámetros"
+    [Parameter]
+    public UsuarioRegister UsuarioRegister { get; set; } = new UsuarioRegister();
+
+    private string error;
+    #endregion
+
+    #region "Métodos"
+
+    private async Task Guardar()
+    {
+        bool editando = UsuarioRegister.ID != 0;
+        bool continuar = true;
+
+        if (editando)
+        {
+
+            SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Guardarás los cambios sobre el usuario",
+                Icon = SweetAlertIcon.Info,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Aceptar",
+                CancelButtonText = "Cancelar",
+
+            });
+
+            continuar = !string.IsNullOrEmpty(result.Value);
+        }
+
+        if (continuar)
+        {
+            HttpResponseMessage respuestaHttp;
+
+            respuestaHttp = await http.PostAsJsonAsync("api/Persona/Nuevo", UsuarioRegister);
+
+            var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+            int rpta = int.Parse(content.ToString());
+
+            if (rpta == 1)
+            {
+                await Swal.FireAsync(
+                  "Hecho",
+                  "Los cambios han sido guardados correctamente.",
+                  SweetAlertIcon.Success
+                  );
+
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                error = "No se pudo registrar";
+            }
+        }
+
+    }
+
+    #endregion
+}

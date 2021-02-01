@@ -1,5 +1,7 @@
 ﻿@page "/editarPaginaTipoUsuario/{ID}"
 @inject HttpClient http;
+@attribute [Authorize]
+
 
 <PaginaTipoUsuarioForm PaginaTipoUsuario=paginaTipoUsuario />
 

@@ -1,0 +1,45 @@
+﻿@page "/token/{token}"
+@inject HttpClient http;
+
+@if (cargando)
+{
+    <div class="alert alert-info">
+        Procesando activación...
+    </div>
+}
+else
+{
+
+    @if (error)
+    {
+        <div class="alert alert-danger">
+            No existe el token
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success">
+            Cuenta activada
+        </div>
+        <NavLink href="/">
+            <button type="button" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Login
+            </button>
+        </NavLink>
+    }
+}
+
+@code {
+    [Parameter] public string token { get; set; }
+
+    bool error = true;
+    bool cargando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        int respuesta = await http.GetFromJsonAsync<int>($"api/Usuarios/Token/{token}");
+        cargando = false;
+        error = respuesta == 0 ? true : false;
+
+    }
+}

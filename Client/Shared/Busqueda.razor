@@ -1,0 +1,38 @@
+﻿@*<input @oninput="(e =>TextoChanged.InvokeAsync(Texto))"
+    type="search"
+    @bind="@Texto" />*@
+
+<div class="mb-3 col-2">
+    <input type="text"
+           class="form-control"
+           placeholder="@Label"
+           @bind-value="@TextoBuscar"
+           @bind-value:event="oninput"
+           @onkeyup="BusquedaChanged" />
+</div>
+
+@code {
+    private Timer _timer;
+    public string TextoBuscar { get; set; }
+
+    [Parameter]
+    public string ID { get; set; }
+
+    [Parameter] public string Label { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnBusquedaChanged { get; set; }
+
+    private void BusquedaChanged()
+    {
+        if (_timer != null)
+            _timer.Dispose();
+        _timer = new Timer(OnTimerElapsed, null, 500, 0);
+    }
+
+    private void OnTimerElapsed(object sender)
+    {
+        OnBusquedaChanged.InvokeAsync(TextoBuscar);
+        _timer.Dispose();
+    }
+}

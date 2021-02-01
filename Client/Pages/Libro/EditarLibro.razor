@@ -1,6 +1,8 @@
 ﻿@page "/editarLibro/{ID}"
 
 @inject HttpClient http;
+@attribute [Authorize]
+
 
 <LibroForm Libro=libro Autores=autores />
 

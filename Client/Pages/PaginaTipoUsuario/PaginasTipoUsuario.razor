@@ -1,8 +1,10 @@
-﻿@page "/paginasTipoUsuario"
+﻿@page "/paginasUsuario/{IDPagina}"
 
 @using _01_MiPrimeraApp.Shared;
 
 @inject HttpClient http;
+@attribute [Authorize]
+
 
 <Lista Boton=false
        Cabeceras=cabeceras
@@ -14,20 +16,24 @@
        eventBusqueda="Buscar"
        eventEliminar="Eliminar"
        Mensaje="Seleccione tipo de usuario"
-       permitirEditar=true
-       permitirEliminar=true
+              IDPagina=@IDPagina
        rutaEditar="editarPaginaTipoUsuario"
        Tipo="combobox"
-       ValueMember="ID"/>
+       ValueMember="ID" />
 
 @code {
     #region "Propiedades"
-    private string[] cabeceras = { "ID", "Nombre", "Tipo Usuario"};
+    private string[] cabeceras = { "ID", "Nombre", "Tipo Usuario" };
     private bool cargando = true;
-    private string[] columnasMostrar = { "ID", "Nombre", "NombreTipoUsuario"};
+    private string[] columnasMostrar = { "ID", "Nombre", "NombreTipoUsuario" };
 
     private PaginaTipoUsuario[] paginasTipoUsuario;
     private TipoUsuario[] tiposUsuario;
+
+    #endregion
+
+    #region "Parámetros"
+    [Parameter] public string IDPagina { get; set; }
     #endregion
 
     #region "Métodos"
@@ -53,8 +59,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         paginasTipoUsuario = await http.GetFromJsonAsync<PaginaTipoUsuario[]>("api/PaginasTipoUsuario/GetAll");
         tiposUsuario = await http.GetFromJsonAsync<TipoUsuario[]>("api/TipoUsuario/GetAll");
+
         cargando = false;
     }
     #endregion

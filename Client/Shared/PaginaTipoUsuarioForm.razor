@@ -55,7 +55,7 @@
         </div>
     </div>
 
-    <BotoneraBasica PaginaVolver="/paginasTipoUsuario" />
+    <BotoneraBasica PaginaVolver="@paginaEnviar" />
 </EditForm>
 
 @code {
@@ -68,12 +68,18 @@
 
     #region "Propiedades"
     private List<_01_MiPrimeraApp.Shared.Boton> botones { get; set; } = new List<Boton>();
+
+    private string paginaEnviar;
     #endregion
 
     #region "Métodos"
     protected override async Task OnInitializedAsync()
     {
         botones = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.Boton>>($"api/PaginasTipoUsuario/GetButtonsAll");
+        paginaEnviar = "paginasUsuario";
+
+        int idPagina = await http.GetJsonAsync<int>($"api/Pagina/GetId/{paginaEnviar}");
+        paginaEnviar = $"/{paginaEnviar}/{idPagina}";
     }
 
     private async Task Guardar()
@@ -124,7 +130,7 @@
                     SweetAlertIcon.Success
                     );
 
-                navigationManager.NavigateTo("/paginasTipoUsuario");
+                navigationManager.NavigateTo(paginaEnviar);
             }
         }
     }

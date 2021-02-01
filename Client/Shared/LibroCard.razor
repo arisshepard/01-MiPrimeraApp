@@ -1,0 +1,47 @@
+﻿@inject IJSRuntime jsRuntime;
+
+<div class="col-md-4 col-lg-4 col-xl-3">
+    <div class="card">
+        <img src="@Libro.Fotocaratula" class="card-img-top" alt="@Libro.Titulo">
+        <div class="card-body">
+            <h5 class="card-title">@Libro.Titulo - @Libro.Autor</h5>
+            <h6 class="card-title">Stock @Libro.Stock</h6>
+            <p class="card-text">@Libro.Resumen</p>
+            @if (VerDescargar)
+            {
+                <button type="button" class="btn btn-success" @onclick="@(e => Descargar(Libro.ID.ToString()))">Descargar</button>
+            }
+
+            @if (VerReservar)
+            {
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#@ID"
+                        @onclick="@(e => Reservar(Libro.ID.ToString()))">
+                    Reservar
+                </button>
+            }
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public _01_MiPrimeraApp.Shared.Libro Libro { get; set; }
+    [Parameter] public bool VerDescargar { get; set; } = false;
+    [Parameter] public bool VerReservar { get; set; } = false;
+    [Parameter] public string ID { get; set; }
+
+    [Parameter] public EventCallback<string> EventID { get; set; }
+
+
+    private async Task Descargar(string ID)
+    {
+
+        await jsRuntime.InvokeVoidAsync("descargarPDF", Libro.Libropdf);
+    }
+
+    private async Task Reservar(string ID)
+    {
+
+        await EventID.InvokeAsync(ID);
+    }
+}

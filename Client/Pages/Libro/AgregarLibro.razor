@@ -1,6 +1,8 @@
 ﻿@page "/agregarLibro"
 
 @inject HttpClient http
+@attribute [Authorize]
+
 
 <LibroForm Autores=autores />
 

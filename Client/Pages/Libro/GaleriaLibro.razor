@@ -1,0 +1,35 @@
+﻿@page "/galeriaLibro/{IDPagina}"
+
+@inject HttpClient http;
+@using _01_MiPrimeraApp.Shared;
+
+@attribute [Authorize]
+
+<ComprobacionesLayout Cargando=cargando HayDatos=@(libros != null)>
+    <FieldsTemplate>
+        <Busqueda OnBusquedaChanged="Buscar" Label="Título" ID="titulo" />
+        <LibrosGalerias Libros="@libros" VerDescargar=@true />
+    </FieldsTemplate>
+</ComprobacionesLayout>
+
+@code {   
+    private _01_MiPrimeraApp.Shared.Libro[] libros;
+    private bool cargando;
+
+    [Parameter] public string IDPagina { get; set; }
+
+    private async Task Buscar(string searchTerm)
+    {
+        cargando = true;
+        libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>($"api/libros/filter/{searchTerm}");
+        cargando = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        cargando = true;
+        libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>("api/libros/getAll");
+        cargando = false;
+    }
+
+}

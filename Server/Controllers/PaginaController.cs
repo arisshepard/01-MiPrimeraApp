@@ -109,6 +109,18 @@ namespace _01_MiPrimeraApp.Server.Controllers
             return pagina;
         }
 
+        [HttpGet]
+        [Route("api/Pagina/GetId/{name}")]
+        public async Task<int> GetIDAsync(string name)
+        {
+            var pagina = await _context.Pagina
+                .Where(paginaDb => paginaDb.Accion == "/"+name)
+                .Select(paginaDb => paginaDb.Iidpagina)
+                .FirstOrDefaultAsync();
+
+            return pagina;
+        }
+
         #endregion "Métodos GET"
 
         #region "Métodos POST"

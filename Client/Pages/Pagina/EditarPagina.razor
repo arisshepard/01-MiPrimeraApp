@@ -2,9 +2,10 @@
 
 @using _01_MiPrimeraApp.Shared;
 @inject HttpClient http;
+@attribute [Authorize]
 
 
-<PaginaForm Pagina=pagina/>
+<PaginaForm Pagina=pagina />
 
 @code {
     #region "Parámetros"

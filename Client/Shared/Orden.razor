@@ -1,0 +1,25 @@
+﻿<div class="mb-3 col-4">
+    <select class="form-control" @onchange="AplicarOrden">
+        <option value="-1">- Ordenar por -</option>
+
+        @foreach (var criterio in Criterios)
+        {
+            <option value="@criterio.Key">@criterio.Value</option>
+        }
+
+    </select>
+</div>
+@code {
+    [Parameter]
+    public EventCallback<string> OnOrdenChanged { get; set; }
+
+    [Parameter]
+    public Dictionary<string, string> Criterios { get; set; }
+
+    private async Task AplicarOrden(ChangeEventArgs eventArgs)
+    {
+        if (eventArgs.Value.ToString() == "-1")
+            return;
+        await OnOrdenChanged.InvokeAsync(eventArgs.Value.ToString());
+    }
+}

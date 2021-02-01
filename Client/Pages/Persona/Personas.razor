@@ -1,6 +1,8 @@
-﻿@page "/personas"
+﻿@page "/personas/{IDPagina}"
 
 @inject HttpClient http
+@attribute [Authorize]
+
 
 <Lista Boton=true
        Cabeceras=cabeceras
@@ -10,16 +12,11 @@
        eventBusqueda="BuscarPorNombre"
        eventEliminar="Eliminar"
        Mensaje="Introduzca nombre completo"
-       permitirAgregar=true
-       permitirEditar=true
-       permitirEliminar=true
-       PermitirExportarEXCEL=true
-       PermitirExportarPDF=true
-       PermitirExportarWord=true
+              IDPagina=@IDPagina
        rutaAgregar="/agregarPersona"
        rutaEditar="/editarPersona"
        Tipo="text"
-       TituloInforme="Personas"/>
+       TituloInforme="Personas" />
 
 @code {
     #region "Propiedades"
@@ -28,6 +25,8 @@
     private bool cargando = true;
 
     private _01_MiPrimeraApp.Shared.Persona[] personas;
+
+    [Parameter] public string IDPagina { get; set; }
     #endregion
 
     #region "Métodos sobrescritos"

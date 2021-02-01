@@ -1,6 +1,9 @@
 ﻿@using _01_MiPrimeraApp.Shared
+@using CurrieTechnologies.Razor.SweetAlert2
+
 @inject HttpClient http;
 @inject NavigationManager navigationManager
+@inject SweetAlertService Swal
 
 <EditForm Model=Persona OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
@@ -54,26 +57,30 @@
 
     @if (contraseñaVisible)
     {
-    <div class="mb-3">
-        <label class="form-label">Contraseña</label>
-        <InputText @bind-Value=Persona.PasswordUsuario class="form-control" type="password" />
-        <ValidationMessage For="@(() => Persona.PasswordUsuario )" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <InputText @bind-Value=Persona.PasswordUsuario class="form-control" type="password" />
+            <ValidationMessage For="@(() => Persona.PasswordUsuario )" />
+        </div>
     }
 
-    <div class="mb-3">
-        <label class="form-label">Tipo Usuario</label>
-        <InputSelect @bind-Value=Persona.IDTipoUsuario class="form-control form-select">
-            <option value="">-- Seleccione --</option>
-            @foreach (var tipo in TiposUsuario)
-            {
-                <option value=@tipo.ID>@tipo.Nombre</option>
-            }
-        </InputSelect>
-        <ValidationMessage For="@(() => Persona.IDTipoUsuario)" />
-    </div>
+    @if (tipoUsuarioVisible)
+    {
 
-    <BotoneraBasica PaginaVolver="/personas" />
+        <div class="mb-3">
+            <label class="form-label">Tipo Usuario</label>
+            <InputSelect @bind-Value=Persona.IDTipoUsuario class="form-control form-select">
+                <option value="">-- Seleccione --</option>
+                @foreach (var tipo in TiposUsuario)
+                    {
+                    <option value=@tipo.ID>@tipo.Nombre</option>
+                    }
+            </InputSelect>
+            <ValidationMessage For="@(() => Persona.IDTipoUsuario)" />
+        </div>
+    }
+
+    <BotoneraBasica PaginaVolver="@paginaEnviar" />
 </EditForm>
 
 @code {
@@ -81,27 +88,104 @@
     [Parameter]
     public Persona Persona { get; set; } = new Persona();
 
-
     [Parameter]
     public List<TipoUsuario> TiposUsuario { get; set; } = new List<TipoUsuario>();
 
     [Parameter]
-    public bool contraseñaVisible { get; set; }= true;
+    public bool contraseñaVisible { get; set; } = true;
+
+    [Parameter]
+    public bool tipoUsuarioVisible { get; set; } = true;
+
+    private string paginaEnviar;
+
+    [Parameter] public string RutaEnviar { get; set; }
+
     #endregion
 
     #region "Métodos"
-    public async Task Guardar()
+    //public async Task Guardar()
+    //{
+    //    var respuesta = await http.PostAsJsonAsync("api/Persona/Save", Persona);
+
+    //    var content = await respuesta.Content.ReadFromJsonAsync<object>();
+
+    //    int rpta = int.Parse(content.ToString());
+
+    //    if (rpta == 1)
+    //    {
+    //        if (!string.IsNullOrEmpty(RutaEnviar))
+    //        {
+    //            navigationManager.NavigateTo(RutaEnviar);
+    //        }
+    //        else
+    //        {
+    //            navigationManager.NavigateTo("/personas");
+
+    //        }
+    //    }
+    //}
+
+    private async Task Guardar()
     {
-        var respuesta = await http.PostAsJsonAsync("api/Persona/Save", Persona);
+        bool editando = Persona.ID != 0;
+        bool continuar = true;
 
-        var content = await respuesta.Content.ReadFromJsonAsync<object>();
-
-        int rpta = int.Parse(content.ToString());
-
-        if (rpta == 1)
+        if (editando)
         {
-            navigationManager.NavigateTo("/personas");
+
+            SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "Guardarás los cambios sobre la persona",
+                Icon = SweetAlertIcon.Info,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Aceptar",
+                CancelButtonText = "Cancelar",
+
+            });
+
+            continuar = !string.IsNullOrEmpty(result.Value);
         }
+
+        if (continuar)
+        {
+            HttpResponseMessage respuestaHttp;
+
+            respuestaHttp = await http.PostAsJsonAsync("api/Persona/Save", Persona);
+
+            var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+            int rpta = int.Parse(content.ToString());
+
+            if (rpta == 1)
+            {
+                await Swal.FireAsync(
+                  "Hecho",
+                  "Los cambios han sido guardados correctamente.",
+                  SweetAlertIcon.Success
+                  );
+
+                if (!string.IsNullOrEmpty(RutaEnviar))
+                {
+                    navigationManager.NavigateTo(RutaEnviar);
+                }
+                else
+                {
+                    navigationManager.NavigateTo(paginaEnviar);
+                }
+            }
+        }
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        paginaEnviar = "personas";
+
+        int idPagina = await http.GetJsonAsync<int>($"api/Pagina/GetId/{paginaEnviar}");
+        paginaEnviar = $"/{paginaEnviar}/{idPagina}";
+
     }
     #endregion
 }

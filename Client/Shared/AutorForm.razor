@@ -59,7 +59,7 @@
         <ValidationMessage For="@(() => Autor.IdPais)" />
     </div>
 
-    <BotoneraBasica PaginaVolver="/autores" />
+    <BotoneraBasica PaginaVolver="@paginaEnviar" />
 </EditForm>
 
 @code {
@@ -75,6 +75,7 @@
     #endregion
 
     #region "Propiedades"
+    private string paginaEnviar;
     #endregion
 
     #region "Métodos"
@@ -88,8 +89,17 @@
 
         if (rpta == 1)
         {
-            navigationManager.NavigateTo("/autores");
+            navigationManager.NavigateTo(paginaEnviar);
         }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        paginaEnviar = "autores";
+
+        int idPagina = await http.GetJsonAsync<int>($"api/Pagina/GetId/{paginaEnviar}");
+        paginaEnviar = $"/{paginaEnviar}/{idPagina}";
+
     }
     #endregion
 

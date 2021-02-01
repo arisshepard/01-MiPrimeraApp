@@ -13,6 +13,7 @@ namespace _01_MiPrimeraApp.Server.Models
 
         public int Iidreserva { get; set; }
         public int? Iidusuario { get; set; }
+        public int? Iidlibro { get; set; }
         public int? Numlibros { get; set; }
         public int? Iidestadoreserva { get; set; }
         public DateTime? Dfechareserva { get; set; }

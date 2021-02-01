@@ -1,0 +1,25 @@
+﻿<div class="row row-cols-1 row-cols-md-2 g-4">
+    @foreach (var libro in Libros)
+    {
+        <LibroCard Libro=@libro VerDescargar=@VerDescargar VerReservar=@VerReservar
+                   ID="reservaPopup" 
+                   EventID="@(e => Reservar(libro.ID.ToString()))"/>
+    }
+</div>
+@code {
+    [Parameter] public _01_MiPrimeraApp.Shared.Libro[] Libros
+    {
+        get; set; }
+
+    [Parameter] public bool VerDescargar { get; set; }
+    [Parameter] public bool VerReservar { get; set; }
+    [Parameter] public string ID { get; set; }
+
+    [Parameter] public EventCallback<string> EventID { get; set; }
+
+    private async Task Reservar(string ID)
+    {
+
+        await EventID.InvokeAsync(ID);
+    }
+}

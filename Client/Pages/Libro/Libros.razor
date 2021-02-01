@@ -1,23 +1,41 @@
-﻿@page "/libros"
+﻿@page "/libros/{IDPagina}"
+
 @inject HttpClient http;
 
-<Lista 
-       Boton=true
-       Cabeceras=cabeceras 
-       Cargando=cargando 
+@attribute [Authorize]
+@*<AuthorizeView>
+    <Authorized>*@
+@*<Lista Boton=true
+       Cabeceras=cabeceras
+       Cargando=cargando
        ColumnasMostrar=columnasMostrar
        Datos=libros
        eventBusqueda="Buscar"
        eventEliminar="Eliminar"
        Mensaje="Introduce título"
-       permitirAgregar=true
-       permitirEditar=true
-       permitirEliminar=true
-       PermitirExportarEXCEL=true
-       PermitirExportarPDF=true
+       permitirAgregar=permitirAgregar
+       permitirEditar=permitirEditar
+       permitirEliminar=permitirEliminar
+       PermitirExportarEXCEL=permitirExportarExcel
+       PermitirExportarPDF=permitirExportarPDF
        rutaAgregar="agregarLibro"
        rutaEditar="editarLibro"
-       Tipo="text"/>
+       Tipo="text" />*@
+@*</Authorized>
+    </AuthorizeView>*@
+
+<Lista Boton=true
+       Cabeceras=cabeceras
+       Cargando=cargando
+       ColumnasMostrar=columnasMostrar
+       Datos=libros
+       IDPagina=@IDPagina
+       eventBusqueda="Buscar"
+       eventEliminar="Eliminar"
+       Mensaje="Introduce título"
+       rutaAgregar="agregarLibro"
+       rutaEditar="editarLibro"
+       Tipo="text" />
 
 @code {
     #region "Propiedades"
@@ -28,11 +46,14 @@
     private _01_MiPrimeraApp.Shared.Libro[] libros;
     #endregion
 
+    [Parameter] public string IDPagina { get; set; }
+
     #region "Métodos"
     protected override async Task OnInitializedAsync()
     {
         cargando = true;
         libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>("api/libros/getAll");
+
         cargando = false;
     }
 
@@ -59,6 +80,5 @@
         cargando = false;
     }
     #endregion
-
 
 }

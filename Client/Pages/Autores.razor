@@ -1,26 +1,24 @@
-﻿@page "/autores"
+﻿@page "/autores/{IDPagina}"
 @using _01_MiPrimeraApp.Shared
+@using Microsoft.AspNetCore.Authorization;
 @inject HttpClient http
 
-<Lista Cabeceras=cabeceras Cargando=cargando Datos=autores 
-       Mensaje="Ingresa el autor" 
-       Tipo="combobox" 
-       DisplayMember="Nombre" 
-       ValueMember="ID" 
-       Combobox=paises 
-       eventBusqueda="Buscar" 
+@attribute [Authorize]
+
+<Lista Cabeceras=cabeceras Cargando=cargando Datos=autores
+       Mensaje="Ingresa el autor"
+       Tipo="combobox"
+       DisplayMember="Nombre"
+       ValueMember="ID"
+       Combobox=paises
+       eventBusqueda="Buscar"
        Boton=false
-       permitirEliminar=true
-       permitirAgregar=true
        rutaAgregar="agregarAutor"
-       permitirEditar=true
        rutaEditar="editarAutor"
        eventEliminar="Eliminar"
-       PermitirExportarEXCEL=true
-       PermitirExportarPDF=true
-       PermitirExportarWord=true
+       IDPagina=@IDPagina
        TituloInforme="Autores"
-       ColumnasMostrar=propiedadesMostrar/>
+       ColumnasMostrar=propiedadesMostrar />
 
 @code {
     private _01_MiPrimeraApp.Shared.Autor[] autores;
@@ -31,6 +29,10 @@
     string[] cabeceras = { "ID", "Nombre", "Sexo", "Pais", "Descripción" };
 
     string[] propiedadesMostrar = { "ID", "Nombre", "Sexo", "Pais", "Descripcion" };
+
+    #region "Parámetros"
+    [Parameter] public string IDPagina { get; set; }
+    #endregion
 
     protected override async Task OnInitializedAsync()
     {

@@ -3,6 +3,8 @@
 @using _01_MiPrimeraApp.Shared
 
 @inject HttpClient http;
+@attribute [Authorize]
+
 
 <AutorForm Paises=paises Sexos=sexos Autor=autor />
 

@@ -107,6 +107,32 @@ namespace _01_MiPrimeraApp.Server.Controllers
             return _mappingService.Map(paginaTipoUsuarioDb);
         }
 
+        [HttpGet]
+        [Route("api/PaginasTipoUsuario/GetButtons/{IDUsuario}/{IDPagina}")]
+        public async Task<List<int>> GetButtonsAsync(int IDUsuario, int IDPagina)
+        {
+            List<int> botones = new List<int>();
+
+            int IDTipoUsuario = await _context.Usuario
+                .Where(usuario => usuario.Iidusuario == IDUsuario)
+                .Select(usuario => (int)usuario.Iidtipousuario)
+                .FirstOrDefaultAsync();
+
+            int IDPaginaTipoUSuario = await _context.PaginaTipoUsuario
+                .Where(pagina => pagina.Iidtipousuario == IDTipoUsuario &&
+                pagina.Iidpagina == IDPagina)
+                .Select(pagina => pagina.Iidpaginatipousuario)
+                .FirstOrDefaultAsync();
+
+            var listabotones = await _context.PaginaTipoUsuButton
+                .Where(pagina => pagina.Iidpaginatipousuario == IDPaginaTipoUSuario &&
+                pagina.Bhabilitado == 1).ToListAsync();
+
+            botones = listabotones.Select(boton => (int)boton.Iidbutton).ToList();
+
+            return botones;
+        }
+
         [HttpPut]
         [Route("api/PaginasTipoUsuario/UpdateById/{ID}")]
         public async Task<int> UpdateByIdASync(int ID, [FromBody] Shared.PaginaTipoUsuario paginaTipoUsuario)

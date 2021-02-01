@@ -15,6 +15,7 @@ namespace _01_MiPrimeraApp.Server.Models
         public int? Iidpersona { get; set; }
         public int? Bhabilitado { get; set; }
         public int? Iidtipousuario { get; set; }
+        public string Token { get; set; }
 
         public virtual Persona IidpersonaNavigation { get; set; }
         public virtual TipoUsuario IidtipousuarioNavigation { get; set; }

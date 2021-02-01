@@ -1,4 +1,6 @@
-﻿<div class="btn-toolbar justify-content-md-center mb-3">
+﻿@inject HttpClient http;
+
+<div class="btn-toolbar justify-content-md-center mb-3">
     <button type="submit" class="btn btn-primary me-3">
         <i class="fas fa-save"></i> Guardar
     </button>
@@ -16,5 +18,13 @@
     [Parameter]
     public string PaginaVolver { get; set; }
     #endregion
+
+    //protected override async Task OnInitializedAsync()
+    //{
+
+    //    int idPagina = await http.GetJsonAsync<int>($"api/Pagina/GetId/{PaginaVolver}");
+    //    PaginaVolver = $"/{PaginaVolver}/{idPagina}";
+
+    //}
 
 }

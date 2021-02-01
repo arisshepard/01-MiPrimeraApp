@@ -1,0 +1,132 @@
+﻿@*Las reservas de una persona*@
+@attribute [Authorize]
+
+@page "/misReservas/{IDPagina}"
+
+@using CurrieTechnologies.Razor.SweetAlert2;
+
+@inject HttpClient http;
+@inject SweetAlertService Swal;
+
+<Lista BotonUnoIcono="fa-check-circle"
+       BotonDosIcono="fa-times-circle"
+       Cabeceras=cabeceras
+       Cargando=cargando
+       ColumnasMostrar=columnasMostrar
+       Datos=reservas
+       eventBotonUno="Aceptar"
+       eventBotonDos="Rechazar"
+       IDPagina=@IDPagina/>
+
+@code {
+    private _01_MiPrimeraApp.Shared.Reserva[] reservas;
+    private bool cargando;
+
+    private string[] cabeceras = { "ID", "Libro", "Cantidad", "Fecha Inicio", "Fecha Fin" };
+    private string[] columnasMostrar = { "ID", "NombreLibro", "Cantidad", "FechaInicioCadena", "FechaFinCadena" };
+
+    [Parameter] public string IDPagina { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> auth { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authUser = await auth;
+        var user = authUser.User;
+        var idUsuario = user.Identity.Name;
+
+        cargando = true;
+        reservas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Reserva[]>($"api/Reserva/GetByUsuario/{idUsuario}");
+        cargando = false;
+    }
+
+    private async Task Aceptar(string ID)
+    {
+        cargando = true;
+        bool continuar;
+
+        SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Estás seguro?",
+            Text = "Aceptarás la reserva",
+            Icon = SweetAlertIcon.Info,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Aceptar",
+            CancelButtonText = "Cancelar",
+
+        });
+
+        continuar = !string.IsNullOrEmpty(result.Value);
+
+        if (continuar)
+        {
+            var authUser = await auth;
+            var user = authUser.User;
+            var idUsuario = user.Identity.Name;
+
+            HttpResponseMessage respuestaHttp = await http.PutAsJsonAsync<object>($"api/Reserva/Recibir/{ID}/1", null);
+
+            var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+            int respuesta = int.Parse(content.ToString());
+
+            if (respuesta == 1)
+            {
+                await Swal.FireAsync(
+               "Cambios realizados",
+               "Los cambios se han guardado correctamente",
+               SweetAlertIcon.Success
+               );
+
+                reservas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Reserva[]>($"api/Reserva/GetByUsuario/{idUsuario}");
+            }
+        }
+
+        cargando = false;
+    }
+
+    private async Task Rechazar(string ID)
+    {
+        cargando = true;
+        bool continuar;
+
+        SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Estás seguro?",
+            Text = "Rechazarás la reserva",
+            Icon = SweetAlertIcon.Info,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Aceptar",
+            CancelButtonText = "Cancelar",
+
+        });
+
+        continuar = !string.IsNullOrEmpty(result.Value);
+
+        if (continuar)
+        {
+            var authUser = await auth;
+            var user = authUser.User;
+            var idUsuario = user.Identity.Name;
+
+            HttpResponseMessage respuestaHttp = await http.PutAsJsonAsync<object>($"api/Reserva/Recibir/{ID}/0", null);
+
+            var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+            int respuesta = int.Parse(content.ToString());
+
+            if (respuesta == 1)
+            {
+                await Swal.FireAsync(
+               "Cambios realizados",
+               "Los cambios se han guardado correctamente",
+               SweetAlertIcon.Success
+               );
+
+                reservas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Reserva[]>($"api/Reserva/GetByUsuario/{idUsuario}");
+            }
+        }
+
+        cargando = false;
+    }
+
+}

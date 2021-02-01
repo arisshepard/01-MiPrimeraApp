@@ -1,6 +1,26 @@
-﻿@page "/tiposLibro"
+﻿@page "/tiposLibro/{IDPagina}"
 @using _01_MiPrimeraApp.Shared
 @inject HttpClient http
+
+@attribute [Authorize]
+
+@*<AuthorizeView>
+    <Authorized>*@
+@*<Lista Cabeceras=cabeceras Cargando=cargando
+       ColumnasMostrar=columnasMostrar
+       Datos=tiposLibro
+       Mensaje="Ingresa el tipo de libro"
+       Tipo="text"
+       eventBusqueda="Buscar"
+       Boton=false
+       permitirAgregar=permitirAgregar
+       rutaAgregar="agregarTipoLibro"
+       permitirEditar=permitirEditar
+       rutaEditar="editarTipoLibro"
+       permitirEliminar=permitirEliminar
+       eventEliminar="Eliminar" />*@
+@*</Authorized>
+    </AuthorizeView>*@
 
 <Lista Cabeceras=cabeceras Cargando=cargando
        ColumnasMostrar=columnasMostrar
@@ -9,12 +29,10 @@
        Tipo="text"
        eventBusqueda="Buscar"
        Boton=false
-       permitirAgregar=true
        rutaAgregar="agregarTipoLibro"
-       permitirEditar=true
        rutaEditar="editarTipoLibro"
-       permitirEliminar=true
-       eventEliminar="Eliminar" />
+       eventEliminar="Eliminar"
+       IDPagina=@IDPagina/>
 
 @code {
     private _01_MiPrimeraApp.Shared.TipoLibro[] tiposLibro;
@@ -23,10 +41,38 @@
     string[] cabeceras = { "ID", "Nombre", "Descripción" };
     string[] columnasMostrar = { "ID", "Nombre", "Descripcion" };
 
+    //private bool permitirAgregar;
+    //private bool permitirEditar;
+    //private bool permitirEliminar;
+    //private bool permitirExportarExcel;
+    //private bool permitirExportarWord;
+    //private bool permitirExportarPDF;
+
+    [Parameter] public string IDPagina { get; set; }
+    //[CascadingParameter] Task<AuthenticationState> auth { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
 
         tiposLibro = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.TipoLibro[]>("api/TipoLibro/Get");
+
+        //var authUser = await auth;
+        //var user = authUser.User;
+
+        //if (user.Identity.IsAuthenticated)
+        //{
+        //    var botones = await http.GetFromJsonAsync<List<int>>($"api/PaginasTipoUsuario/GetButtons/{user.Identity.Name}/{IDPagina}");
+        //    if (botones.Any())
+        //    {
+        //        permitirAgregar = botones.Contains(1);
+        //        permitirEditar = botones.Contains(2);
+        //        permitirEliminar = botones.Contains(3);
+        //        permitirExportarExcel = botones.Contains(4);
+        //        permitirExportarWord = botones.Contains(5);
+        //        permitirExportarPDF = botones.Contains(6);
+        //    }
+        //}
+
         cargando = false;
     }
 

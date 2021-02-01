@@ -42,11 +42,11 @@
                     {
                         <tr>
                             <td>
-                                @{ 
+                                @{
                                     bool isChecked = TipoUsuario.PaginasID.Contains(pagina.ID);
                                 }
 
-                                <input type="checkbox" class="form-check-input" @onchange="() => SeleccionarPagina(pagina.ID)" checked="@isChecked"  />
+                                <input type="checkbox" class="form-check-input" @onchange="() => SeleccionarPagina(pagina.ID)" checked="@isChecked" />
 
                             </td>
                             <td>@pagina.Mensaje</td>
@@ -57,25 +57,34 @@
         </div>
     </div>
 
-    <BotoneraBasica PaginaVolver="/tiposUsuario" />
+    <BotoneraBasica PaginaVolver="@paginaEnviar" />
 </EditForm>
 
 @code {
 
-    #region "Parámetros"
-    [Parameter]
-    public TipoUsuario TipoUsuario { get; set; } = new TipoUsuario();
+        #region "Parámetros"
+        [Parameter]
+        public TipoUsuario TipoUsuario { get; set; } = new TipoUsuario();
 
     #endregion
 
-    #region "Propiedades"
+        #region "Propiedades"
     private List<_01_MiPrimeraApp.Shared.Pagina> paginas { get; set; } = new List<Pagina>();
+    private string paginaEnviar;
+
+
+    //private string paginaEnviar;
+
     #endregion
 
     #region "Métodos"
     protected override async Task OnInitializedAsync()
     {
         paginas = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.Pagina>>($"api/Pagina/GetAll");
+        paginaEnviar = "tiposUsuario";
+
+        int idPagina = await http.GetJsonAsync<int>($"api/Pagina/GetId/{paginaEnviar}");
+        paginaEnviar = $"/{paginaEnviar}/{idPagina}";
     }
 
     private async Task Guardar()
@@ -126,7 +135,7 @@
                     SweetAlertIcon.Success
                     );
 
-                navigationManager.NavigateTo("/tiposUsuario");
+                navigationManager.NavigateTo(paginaEnviar);
             }
         }
     }

@@ -1,0 +1,47 @@
+﻿<div class="btn-toolbar justify-content-md-end mb-3">
+    @if (PermitirAgregar)
+    {
+
+        <NavLink href="@RutaAgregar">
+            <button class="btn btn-primary fas fa-plus me-2"></button>
+        </NavLink>
+
+    }
+
+    @if (Datos != null && Datos.Any() && PermitirExportarExcel)
+    {
+        <NavLink href=@Excel>
+            <button class="btn btn-success fas fa-file-csv me-2" @onclick="ExportarExcel"></button>
+        </NavLink>
+    }
+
+    @if (Datos != null && Datos.Any() && PermitirExportarWord)
+    {
+        <NavLink href=@Word>
+            <button class="btn btn-primary fas fa-file-word me-2" @onclick="ExportarWord"></button>
+        </NavLink>
+    }
+
+    @if (Datos != null && Datos.Any() && PermitirExportarPDF)
+    {
+        <NavLink href=@PDF>
+            <button class="btn btn-danger fas fa-file-pdf" @onclick="ExportarPDF"></button>
+        </NavLink>
+    }
+</div>
+
+@code{ 
+    [Parameter] public bool PermitirAgregar { get; set; }
+    [Parameter] public bool PermitirExportarExcel { get; set; }
+    [Parameter] public bool PermitirExportarWord { get; set; }
+    [Parameter] public bool PermitirExportarPDF { get; set; }
+    [Parameter] public object[] Datos{ get; set; }
+    [Parameter] public string RutaAgregar { get; set; }
+    [Parameter] public string Excel { get; set; }
+    [Parameter] public string Word { get; set; }
+    [Parameter] public string PDF { get; set; }
+
+    [Parameter] public EventCallback ExportarExcel { get; set; }
+    [Parameter] public EventCallback ExportarWord { get; set; }
+    [Parameter] public EventCallback ExportarPDF { get; set; }
+}

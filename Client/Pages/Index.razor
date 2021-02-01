@@ -1,15 +1,105 @@
-﻿@page "/"
+﻿@layout LoginLayout
+@page "/"
 
+@using _01_MiPrimeraApp.Shared;
+@using _01_MiPrimeraApp.Client.Services;
+@inject NavigationManager navigationManager;
+@inject AuthenticationStateProvider auth;
+@inject HttpClient http;
 
-    @*<Cursos />
-    <Alerta />
+<div class="row m-0 h-100 form-div">
+    <div class="col p-0 text-center d-flex justify-content-center align-items-center display-none">
+        <img src="../assets/img/login.svg" class="w-100">
+    </div>
+    <div class="col p-0 bg-custom d-flex justify-content-center align-items-center flex-column w-100">
+        <EditForm class="w-75" Model=usuario OnValidSubmit="Login">
+            <DataAnnotationsValidator />
+            <div class="mb-3">
+                <label for="usuario" class="form-label label-login">Usuario</label>
+                <InputText @bind-Value=usuario.Nombre class="form-control" id="usuario" placeholder="Usuario" required />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label label-login">Password</label>
+                <InputText @bind-Value=usuario.Password type="password" class="form-control" id="password" placeholder="password"
+                           required />
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                        <label class="form-check-label label-login" for="flexCheckDefault">
+                            Recordar
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-custom btn-lg btn-block mt-3">Login</button>
+                </div>
+                <div class="mb-3">
+                    <NavLink class="nav-link" href="register" Match="NavLinkMatch.All">
+                        Registrarse
+                    </NavLink>
+                </div>
+        </EditForm>
 
-    <h1>Hello, world!</h1>
-
-    Welcome to your new app.
-
-    <SurveyPrompt Title="How is Blazor working for you?" />*@
-<div class="container">
-    <h1>Hola a todos</h1>
-    <p>Esta es mi primera aplicación en blazor</p>
+        <h1>@error</h1>
+    </div>
 </div>
+
+@code{
+    private string error;
+    private Usuario usuario = new Usuario();
+
+    private async Task Login()
+    {
+        var respuesta = await http.PostAsJsonAsync("api/Usuarios/Login", usuario);
+
+        var content = await respuesta.Content.ReadFromJsonAsync<object>();
+
+        int rpta = int.Parse(content.ToString());
+
+        if (rpta != 0)
+        {
+            if (rpta == -1)
+            {
+                error = "La cuenta no está activada";
+            }
+            else
+            {
+                // Llamar al entrar
+                ((Autenticacion)auth).Entrar(rpta.ToString());
+
+                // navegamos a la página de inicio
+                navigationManager.NavigateTo($"/paginaPrincipal/{rpta.ToString()}");
+            }
+
+            //var authState = await auth.GetAuthenticationStateAsync();
+            //var user = authState.User;
+            //if (user.Identity.IsAuthenticated)
+            //{
+            //    // Since the user is a ClaimsPrincipal, you can also enumerate claims,
+            //    // evaluate membership in roles, etc.
+            //    Console.WriteLine($"Hello, {user.Identity.Name}!");
+            //}
+            //else
+            //{
+            //    Console.WriteLine("You're not logged in.");
+            //}
+        }
+        else
+        {
+            error = "El usuario o contraseña no es correcto";
+        }
+    }
+}
+
+@*<AuthorizeView>
+        <Authorized><h1>El usuario está autorizado</h1></Authorized>
+        <NotAuthorized><h1>El usuario NO está autorizado</h1></NotAuthorized>
+    </AuthorizeView>
+
+    <div class="container">
+        <h1>Hola a todos</h1>
+        <p>Esta es mi primera aplicación en blazor</p>
+    </div>*@

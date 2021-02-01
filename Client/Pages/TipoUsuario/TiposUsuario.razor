@@ -1,7 +1,8 @@
-﻿@page "/tiposUsuario"
+﻿@page "/tiposUsuario/{IDPagina}"
 
 @using _01_MiPrimeraApp.Shared;
 @inject HttpClient http;
+@attribute [Authorize]
 
 <Lista Boton=false
        Cabeceras=cabeceras
@@ -11,24 +12,23 @@
        eventBusqueda="Buscar"
        eventEliminar="Eliminar"
        Mensaje="Ingrese tipo de usuario"
-       permitirAgregar=true
-       permitirEditar=true
-       permitirEliminar=true
-       PermitirExportarEXCEL=true
-       PermitirExportarPDF=true
-       PermitirExportarWord=true
+       IDPagina=@IDPagina
        rutaAgregar="agregarTipoUsuario"
        rutaEditar="editarTipoUsuario"
        Tipo="text"
-       TituloInforme="Informe Tipo de Usuario"/>
+       TituloInforme="Informe Tipo de Usuario" />
 
 @code {
     #region "Propiedades"
     private string[] cabeceras = { "ID", "Nombre", "Descripción" };
     private bool cargando = true;
-    private string[] columnasMostrar = { "ID", "Nombre", "Descripcion"};
+    private string[] columnasMostrar = { "ID", "Nombre", "Descripcion" };
 
     private TipoUsuario[] tiposUsuario;
+    #endregion
+
+    #region "Parámetros"
+    [Parameter] public string IDPagina { get; set; }
     #endregion
 
     #region "Métodos"
@@ -54,9 +54,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         tiposUsuario = await http.GetFromJsonAsync<TipoUsuario[]>("api/TipoUsuario/GetAll");
+
         cargando = false;
     }
     #endregion
 }
-

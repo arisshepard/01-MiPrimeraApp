@@ -1,0 +1,88 @@
+﻿@page "/reservaLibro/{IDPagina}"
+
+@using _01_MiPrimeraApp.Shared;
+@using CurrieTechnologies.Razor.SweetAlert2;
+
+@inject HttpClient http;
+@inject SweetAlertService Swal;
+@inject NavigationManager navigationManager;
+
+@attribute [Authorize]
+
+<ComprobacionesLayout Cargando=cargando HayDatos=@(libros != null)>
+    <FieldsTemplate>
+        <Busqueda OnBusquedaChanged="Buscar" Label="Título" ID="titulo" />
+        <LibrosGalerias Libros="@libros" VerReservar=true ID="reservaPopup"
+                        EventID="Reservar" />
+        <Reserva IDLibro=idControl EventGuardar="Guardar" />
+    </FieldsTemplate>
+</ComprobacionesLayout>
+
+@code {
+    private _01_MiPrimeraApp.Shared.Libro[] libros;
+    private bool cargando;
+
+    private int idControl = 0;
+
+    [Parameter] public string IDPagina { get; set; }
+
+    private async Task Buscar(string searchTerm)
+    {
+        cargando = true;
+        libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>($"api/libros/filter/{searchTerm}");
+        cargando = false;
+    }
+
+    private async Task Reservar(string ID)
+    {
+        idControl = int.Parse(ID);
+    }
+
+    private async Task Guardar(_01_MiPrimeraApp.Shared.Reserva reserva)
+    {
+        bool continuar;
+
+        SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Estás seguro?",
+            Text = "Guardarás los cambios sobre la reserva",
+            Icon = SweetAlertIcon.Info,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Aceptar",
+            CancelButtonText = "Cancelar",
+
+        });
+
+        continuar = !string.IsNullOrEmpty(result.Value);
+
+        if (continuar)
+        {
+
+            var respuesta = await http.PostAsJsonAsync("api/Reserva/Nueva", reserva);
+
+            var content = await respuesta.Content.ReadFromJsonAsync<object>();
+
+            int rpta = int.Parse(content.ToString());
+
+            if (rpta == 1)
+            {
+                await Swal.FireAsync(
+                    "Cambios realizados",
+                    "Los cambios se han guardado correctamente",
+                    SweetAlertIcon.Success
+                    );
+
+                // TODO: implementar cierre popup
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        cargando = true;
+        libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>
+    ("api/libros/getAll");
+        cargando = false;
+    }
+
+}

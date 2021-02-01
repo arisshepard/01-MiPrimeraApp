@@ -1,7 +1,9 @@
 ﻿@page "/editarPersona/{ID}"
 @inject HttpClient http
+@attribute [Authorize]
 
-<PersonaForm Persona=persona TiposUsuario=tiposUsuario contraseñaVisible=false />
+
+<PersonaForm Persona=persona TiposUsuario=tiposUsuario contraseñaVisible=false RutaEnviar="/personas" />
 
 @code {
     #region "Parámetros"

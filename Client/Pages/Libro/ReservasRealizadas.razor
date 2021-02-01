@@ -1,0 +1,142 @@
+﻿@*Reservas Registradas*@
+@attribute [Authorize]
+
+@page "/reservas/{IDPagina}"
+
+@using CurrieTechnologies.Razor.SweetAlert2;
+
+@inject HttpClient http;
+@inject SweetAlertService Swal;
+
+<Lista Boton=false
+       BotonUnoIcono="fa-paper-plane"
+       BotonDosIcono="fa-eye"
+       Cabeceras=cabeceras
+       Cargando=cargando
+       ColumnasMostrar=columnasMostrar
+       Datos=reservas
+       IDPagina=@IDPagina
+       eventEliminar="Eliminar"
+       eventBotonUno="Enviar"
+       eventBotonDos="Observar"
+       eventBusqueda="Buscar"
+       Tipo="text" />
+
+@code {
+    private _01_MiPrimeraApp.Shared.Reserva[] reservas;
+    private bool cargando;
+
+    private string[] cabeceras = { "ID", "Usuario", "Libro", "Cantidad", "Fecha Inicio", "Fecha Fin" };
+    private string[] columnasMostrar = { "ID", "NombreUsuario", "NombreLibro", "Cantidad", "FechaInicioCadena", "FechaFinCadena" };
+
+    [Parameter] public string IDPagina { get; set; }
+    [CascadingParameter] private Task<AuthenticationState> auth { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        cargando = true;
+        reservas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Reserva[]>
+($"api/Reserva/GetByEstado/1");
+        cargando = false;
+    }
+
+    private async Task Buscar(string texto)
+    {
+        cargando = true;
+        //libros = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Libro[]>($"api/libros/filter/{texto}");
+        cargando = false;
+    }
+
+    private async Task Enviar(string ID)
+    {
+
+        cargando = true;
+        bool continuar;
+
+        SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Estás seguro?",
+            Text = "Enviarás la reserva al usuario",
+            Icon = SweetAlertIcon.Info,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Aceptar",
+            CancelButtonText = "Cancelar",
+
+        });
+
+        continuar = !string.IsNullOrEmpty(result.Value);
+
+        if (continuar)
+        {
+            var authUser = await auth;
+            var user = authUser.User;
+            var idUsuario = user.Identity.Name;
+
+            HttpResponseMessage respuestaHttp = await http.PutAsJsonAsync<_01_MiPrimeraApp.Shared.Reserva>($"api/Reserva/Enviar/{idUsuario}/{ID}", null);
+
+            var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+            int respuesta = int.Parse(content.ToString());
+
+            if (respuesta == 1)
+            {
+                await Swal.FireAsync(
+               "Cambios realizados",
+               "Los cambios se han guardado correctamente",
+               SweetAlertIcon.Success
+               );
+
+                reservas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Reserva[]>
+($"api/Reserva/GetByEstado/1");
+            }
+        }
+        cargando = false;
+    }
+
+    private async Task Eliminar(string ID)
+    {
+        cargando = true;
+        bool continuar;
+
+        SweetAlertResult result = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Estás seguro?",
+            Text = "Eliminarás la reserva",
+            Icon = SweetAlertIcon.Info,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Aceptar",
+            CancelButtonText = "Cancelar",
+
+        });
+
+        continuar = !string.IsNullOrEmpty(result.Value);
+
+        if (continuar)
+        {
+            HttpResponseMessage respuestaHttp = await http.PutAsJsonAsync<object>($"api/Reserva/Delete/{ID}", null);
+
+            var content = await respuestaHttp.Content.ReadFromJsonAsync<object>();
+
+            int respuesta = int.Parse(content.ToString());
+
+            if (respuesta == 1)
+            {
+                await Swal.FireAsync(
+               "Cambios realizados",
+               "Los cambios se han guardado correctamente",
+               SweetAlertIcon.Success
+               );
+
+                reservas = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Reserva[]>
+($"api/Reserva/GetByEstado/1");
+            }
+        }
+
+        cargando = false;
+    }
+
+    private async Task Observar(string ID)
+    {
+    }
+
+}

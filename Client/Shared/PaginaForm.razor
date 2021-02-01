@@ -30,7 +30,8 @@
         <InputCheckbox @bind-Value=Pagina.Visible class="form-check-input" />
     </div>
 
-    <BotoneraBasica PaginaVolver="/paginas" />
+    <BotoneraBasica PaginaVolver="@paginaEnviar" />
+
 </EditForm>
 
 @code {
@@ -41,6 +42,7 @@
     #endregion
 
     #region "Propiedades"
+    private string paginaEnviar;
     #endregion
 
     #region "Métodos"
@@ -85,9 +87,18 @@
 
             if (rpta == 1)
             {
-                navigationManager.NavigateTo("/paginas");
+                navigationManager.NavigateTo(paginaEnviar);
             }
         }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        paginaEnviar = "paginas";
+
+        int idPagina = await http.GetJsonAsync<int>($"api/Pagina/GetId/{paginaEnviar}");
+        paginaEnviar = $"/{paginaEnviar}/{idPagina}";
+
     }
     #endregion
 }

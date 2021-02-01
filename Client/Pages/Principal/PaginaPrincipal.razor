@@ -1,0 +1,27 @@
+﻿@page "/paginaPrincipal/{ID}"
+@inject HttpClient http
+@using _01_MiPrimeraApp.Shared;
+
+@attribute [Authorize]
+
+<PersonaForm contraseñaVisible=false
+             Persona=persona
+             TiposUsuario=tiposUsuario
+             tipoUsuarioVisible=false/>
+
+@code {
+
+    [Parameter]
+    public string ID { get; set; }
+
+    private _01_MiPrimeraApp.Shared.Persona persona = new Persona();
+    private List<_01_MiPrimeraApp.Shared.TipoUsuario> tiposUsuario { get; set; } = new List<_01_MiPrimeraApp.Shared.TipoUsuario>();
+
+    protected async override Task OnParametersSetAsync()
+    {
+        int personaID = await http.GetFromJsonAsync<int>($"api/Persona/GetID/{ID}");
+        persona = await http.GetFromJsonAsync<_01_MiPrimeraApp.Shared.Persona>($"api/Persona/GetById/{personaID}");
+        tiposUsuario = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.TipoUsuario>>("api/TipoUsuario/GetAll");
+
+    }
+}

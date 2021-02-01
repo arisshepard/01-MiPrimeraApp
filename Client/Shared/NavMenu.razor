@@ -1,62 +1,123 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">Blazor Books</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
+﻿@inject HttpClient http
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="tiposLibro">
-                <span class="oi oi-bookmark" aria-hidden="true"></span> Tipos Libro
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="autores">
-                <span class="oi oi-pencil" aria-hidden="true"></span> Autores
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="personas">
-                <span class="oi oi-people" aria-hidden="true"></span> Personas
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="libros">
-                <span class="oi oi-book" aria-hidden="true"></span> Libros
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="paginas">
-                <span class="oi oi-document" aria-hidden="true"></span> Páginas
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="tiposUsuario">
-                <span class="oi oi-person" aria-hidden="true"></span> Tipos Usuario
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="paginasTipoUsuario">
-                <span class="oi oi-lock-locked" aria-hidden="true"></span> Seguridad
-            </NavLink>
-        </li>
-    </ul>
-</div>
+    <AuthorizeView>
+        <Authorized>
+            <div class="top-row pl-4 navbar navbar-dark">
+                <a class="navbar-brand" href="">Blazor Books</a>
+                <button class="navbar-toggler" @onclick="ToggleNavMenu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
-@code {
-    private bool collapseNavMenu = true;
+            <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+                <ul class="nav flex-column">
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="@rutaprincipal" Match="NavLinkMatch.All">
+                            <span class="oi oi-home" aria-hidden="true"></span> Home
+                        </NavLink>
+                    </li>
+                    @foreach (var pagina in paginas)
+                    {
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="@pagina.Accion" @onclick="OnClick">
+                                <span class="oi oi-bookmark" aria-hidden="true"></span> @pagina.Mensaje
+                            </NavLink>
+                        </li>
+                    }
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+                    @*<li class="nav-item px-3">
+                            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                                <span class="oi oi-home" aria-hidden="true"></span> Home
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="tiposLibro">
+                                <span class="oi oi-bookmark" aria-hidden="true"></span> Tipos Libro
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="autores">
+                                <span class="oi oi-pencil" aria-hidden="true"></span> Autores
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="personas">
+                                <span class="oi oi-people" aria-hidden="true"></span> Personas
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="libros">
+                                <span class="oi oi-book" aria-hidden="true"></span> Libros
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="paginas">
+                                <span class="oi oi-document" aria-hidden="true"></span> Páginas
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="tiposUsuario">
+                                <span class="oi oi-person" aria-hidden="true"></span> Tipos Usuario
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="paginasTipoUsuario">
+                                <span class="oi oi-lock-locked" aria-hidden="true"></span> Seguridad
+                            </NavLink>
+                        </li>*@
+                    @*<li class="nav-item px-3 d-none d-sm-block d-md-none">
+                            <AuthorizeView>
+                                <Authorized>
+                                    <button class="btn btn-secondary fas fa-sign-out-alt"></button>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <button class="btn btn-success fas fa-sign-in-alt"></button>
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        </li>*@
+                </ul>
+            </div>
+        </Authorized>
+    </AuthorizeView>
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
+    @code {
+
+        [Parameter]
+        public string UsuarioID { get; set; }
+
+        private List<_01_MiPrimeraApp.Shared.Pagina> paginas = new List<_01_MiPrimeraApp.Shared.Pagina>();
+
+        private bool collapseNavMenu = true;
+
+        private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+        private string rutaprincipal;
+
+        private void ToggleNavMenu()
+        {
+            collapseNavMenu = !collapseNavMenu;
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            if (!string.IsNullOrEmpty(UsuarioID))
+            {
+                paginas = await http.GetFromJsonAsync<List<_01_MiPrimeraApp.Shared.Pagina>>($"api/Usuarios/GetPaginas/{UsuarioID}");
+                rutaprincipal = $"/paginaPrincipal/{UsuarioID}";
+            }
+
+        }
+
+        bool _needReload = true;
+
+        protected void OnClick(MouseEventArgs args)
+        {
+            _needReload = false;
+        }
+
+        protected override bool ShouldRender()
+        {
+            return _needReload;
+        }
+
     }
-}

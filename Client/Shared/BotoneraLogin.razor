@@ -1,0 +1,31 @@
+﻿@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider auth;
+@using _01_MiPrimeraApp.Client.Services;
+
+<AuthorizeView>
+    <Authorized>
+        <div class="btn-toolbar justify-content-md-end my-3 d-flex align-items-center">
+            <label class="me-2">
+                Usuario Logado ID: @context.User.Identity.Name
+            </label>
+            <div class="btn-group"></div>
+            <button class="btn btn-secondary fas fa-sign-out-alt" @onclick="Logout"></button>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <button class="btn btn-success fas fa-sign-in-alt" @onclick="Login"></button>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private void Logout()
+    {
+        ((Autenticacion)auth).CerrarSesion();
+        navigationManager.NavigateTo("/");
+    }
+
+    private void Login()
+    {
+        navigationManager.NavigateTo("/");
+    }
+}

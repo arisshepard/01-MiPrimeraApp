@@ -1,7 +1,8 @@
 ﻿@page "/agregarPersona"
 @inject HttpClient http
+@attribute [Authorize]
 
-<PersonaForm TiposUsuario=tiposUsuario />
+<PersonaForm TiposUsuario=tiposUsuario RutaEnviar="/personas" />
 
 @code {
     #region "Propiedades"
